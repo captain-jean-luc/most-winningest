@@ -1,7 +1,7 @@
 # Most Winning-est
 Determines who is the most winningest on the "[Last one to post wins](https://community.tulpa.info/thread-game-last-one-to-post-wins)" thread. Scrapes and parses the posts and then spits out a nice sorted list of username: time winning.
 
-## How to use.
+## How to use:
 
 01. Determine what the last page is (when browsing as an anomomys user, so 10 posts per page). If the most recent post is 7543, then the page that post is on is 755. If the most recent post is 7540, then that will be the last post on page 754.
 02. Run main.rb, which simply downloads the pages as html files and puts them in the `pages/` folder. It takes two arguments, the starting and ending page to download, eg:
@@ -24,9 +24,9 @@ And you're done! Wasn't that easy? No? Too bad.
 
 * `parse-from-file.rb`
 
-	A convenience program to run the parser on a single file and print the output. Mostly useful for debugging. Run like:
+  A convenience program to run the parser on a single file and print the output. Mostly useful for debugging. Run like:
 
-		ruby parse-from-file.rb pages/1.html
+      ruby parse-from-file.rb pages/1.html
 
 * `needing-updates.rb`
 
