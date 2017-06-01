@@ -1,5 +1,6 @@
 require './parse-dotinfo-page'
 require 'time'
+require 'pp'
 
 users = Hash.new(0) #name: length in seconds of winningness
 prev_post = nil

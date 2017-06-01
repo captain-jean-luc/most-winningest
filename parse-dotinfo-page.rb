@@ -72,8 +72,11 @@ def parse_dotinfo_post_time(text, scraped_at = Time.now)
       day -= 60*60*24
     end
     res[:posted_at] = Time.parse $2 + " +0000", day
-  when /\d-\d-\d, \d\d:\d\d(:\d\d)? (AM|PM)?/i
-    res[:posted_at] = Time.parse text + " +0000"
+  when /(\d\d-\d\d-\d\d\d\d), (\d\d:\d\d(:\d\d)? (AM|PM)?)/i
+    date = Time.strptime($1, "%m-%d-%Y")
+    res[:posted_at] = Time.parse ($2 + " +0000"), date
+  else
+    raise "Could not parse post time :("
   end
   return res
 end
