@@ -19,8 +19,14 @@ Dir.chdir('pages') do
           STDERR.puts "whaaaa? Negative delta! #{page_fn} #{post[:index]} #{delta}"
           STDERR.pp prev_post
           STDERR.pp post
-        else
+        elsif !prev_post[:user][:anonymous]
           users[prev_post[:user][:name]] += delta
+          if false && prev_post[:user][:name] == "jean-luc" && delta > ( 3600 * 100 )
+            puts prev_post[:post_body_text].strip
+            puts prev_post[:id]
+            puts (delta / 3600.0)
+            puts "-"*40
+          end
         end
       end
       prev_post = post
@@ -28,9 +34,9 @@ Dir.chdir('pages') do
   end
 end
 
-users.to_a.sort_by{|name,time| time}.each do |name, time|
+users.to_a.sort_by{|name,time| time}.each_with_index do |(name, time), i|
   mm, ss = time.divmod(60)
   hh, mm =   mm.divmod(60)
   dd, hh =   hh.divmod(24)
-  puts "%s: %02dd %02dh %02dm" % [name.rjust(25), dd, hh, mm]
+  puts "%03d.%s:% 4dd %02dh %02dm" % [(users.size - i), name.rjust(25), dd, hh, mm]
 end
