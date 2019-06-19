@@ -2,7 +2,7 @@ require './parse-dotinfo-page'
 require 'time'
 require 'pp'
 
-users = Hash.new(0) #name: length in seconds of winningness
+users = Hash.new() #user id => [most recent name, length in seconds of winningness]
 prev_post = nil
 
 Dir.chdir('pages') do
@@ -20,7 +20,12 @@ Dir.chdir('pages') do
           STDERR.pp prev_post
           STDERR.pp post
         elsif !prev_post[:user][:anonymous]
-          users[prev_post[:user][:name]] += delta
+          curr_data = users[prev_post[:user][:id]] ||= ["",0]
+          
+          curr_data[1] += delta
+          curr_data[0] = prev_post[:user][:name]
+
+          users[prev_post[:user][:id]] = curr_data
           if false && prev_post[:user][:name] == "jean-luc" && delta > ( 3600 * 100 )
             puts prev_post[:post_body_text].strip
             puts prev_post[:id]
@@ -34,7 +39,7 @@ Dir.chdir('pages') do
   end
 end
 
-users.to_a.sort_by{|name,time| time}.each_with_index do |(name, time), i|
+users.to_a.sort_by{|_, (name,time)| time}.each_with_index do |(id, (name, time)), i|
   mm, ss = time.divmod(60)
   hh, mm =   mm.divmod(60)
   dd, hh =   hh.divmod(24)
