@@ -7,7 +7,7 @@ prev_post = nil
 
 Dir.chdir('pages') do
   Dir['*.html'].sort_by(&:to_i).each do |page_fn|
-    puts "reading #{page_fn}" if $DEBUG
+    STDERR.puts "reading #{page_fn}" if true || $DEBUG
     page_html = File.read(page_fn)
     scraped_at = File.mtime(page_fn)
     #puts page_html
@@ -40,8 +40,14 @@ Dir.chdir('pages') do
 end
 
 users.to_a.sort_by{|_, (name,time)| time}.each_with_index do |(id, (name, time)), i|
+  name_num_spaces = [25 - name.size,0].max
+  if name == "あんこ"
+    name_num_spaces -= 2 #hack to align stuff, 2 spaces is specific to tulpa.info, it could be different in a terminal or even a different theme.
+  end
+  name_spaces = " " * name_num_spaces
   mm, ss = time.divmod(60)
   hh, mm =   mm.divmod(60)
   dd, hh =   hh.divmod(24)
-  puts "%03d.%s:% 4dd %02dh %02dm" % [(users.size - i), name.rjust(25), dd, hh, mm]
+  ww, dd =   dd.divmod( 7)
+  puts "%03d.%s: %2dw %dd %02dh %02dm" % [(users.size - i), name_spaces + name, ww, dd, hh, mm]
 end

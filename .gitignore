@@ -52,6 +52,7 @@ build-iPhoneSimulator/
 /pages/*
 !/pages/.keep
 /most-winning-result*
+/most-winning-*.txt
 /pages*.tar
 /pages*.tar.gz
 /pages*.tar.xz
