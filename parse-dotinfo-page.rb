@@ -3,10 +3,23 @@ require 'uri'
 require 'time'
 require 'pp'
 
+class Object
+  def try
+    yield self
+  end
+end
+
+class NilClass
+  def try
+  end
+end
+
 def parse_dotinfo_page(content, scraped_at = Time.now)
   noko = Nokogiri::HTML(content)
   res = {}
-  res[:current_page] = noko.at_css("span.pagination_current").text.strip.to_i
+  res[:current_page] = noko.at_css(".pagination span.pagination_current").text.strip.to_i
+  res[:is_last_page] = noko.at_css(".pagination .pagination_next").nil?
+  res[:last_page] = res[:is_last_page] ? res[:current_page] : noko.at_css(".pagination .pagination_last").try{|n| n.text.strip.to_i}
   res[:uses_relative_timestamps] = false
   last_el = noko.at_css(".pagination_last")
   if last_el.nil?
@@ -125,6 +138,7 @@ def parse_dotinfo_post_time(text, scraped_at = Time.now, help = nil)
       end
     else
       day = Time.strptime(help, "%m-%d-%Y")
+      res[:uses_relative_timestamps] = false
     end
     res[:posted_at] = Time.parse $2 + " +0000", day
   when /(\d\d-\d\d-\d\d\d\d), (\d\d:\d\d(:\d\d)? (AM|PM)?)/i
