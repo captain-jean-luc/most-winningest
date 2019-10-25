@@ -8,10 +8,7 @@ CREATE TABLE IF NOT EXISTS pages (
   rowid integer primary key not null,
   page_num integer not null,
   filename text not null,
-<<<<<<< HEAD
-=======
   updated_at integer not null,
->>>>>>> f1aee1f0c78a53a2e6cc71d7612ef9453bb5b8e3
   needs_update text not null --bool
 );
 
