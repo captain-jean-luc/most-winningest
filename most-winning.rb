@@ -13,6 +13,9 @@ Dir.chdir('pages') do
     #puts page_html
     page = parse_dotinfo_page(page_html, scraped_at)
     page[:posts].each do |post|
+      if false && !post[:user][:anonymous] && post[:user][:name] == "uncannyfellow"
+        pp post
+      end
       unless prev_post.nil?
         delta = (post[:posted_at] - prev_post[:posted_at])
         if delta < 0
@@ -38,7 +41,7 @@ Dir.chdir('pages') do
     end
   end
 end
-
+#exit
 users.to_a.sort_by{|_, (name,time)| time}.each_with_index do |(id, (name, time)), i|
   name_num_spaces = [25 - name.size,0].max
   if name == "あんこ"

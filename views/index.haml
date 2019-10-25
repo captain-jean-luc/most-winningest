@@ -1,0 +1,23 @@
+%html
+  %head
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    %title
+      LOTPW Stats
+  %body
+    .container
+      %h1 LOTPW Stats
+      %p
+        Any time that "Anonymous" accrues is not included. Updated every minute.
+      %hr
+      %table.table.table-striped.table-bordered.table-hover.table-sm
+        %thead
+          %tr
+            %th Position
+            %th Name
+            %th Time
+        %tbody
+          - @rows.each do |row|
+            %tr
+              - row.each do |col|
+                %td{align: "right"}= col
+      %small Made by Jean-luc

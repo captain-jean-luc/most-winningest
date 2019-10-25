@@ -58,3 +58,6 @@ build-iPhoneSimulator/
 /pages*.tar.xz
 /pages*.tar.bz2
 /pages*.tar.lrz
+/trash/*
+
+/rir/target
