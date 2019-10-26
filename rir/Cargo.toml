@@ -12,3 +12,13 @@ futures-preview = { version = "=0.3.0-alpha.19", features = ["async-await"] }
 reqwest = { version = "0.10.0-alpha.1", features = ["gzip", "cookies"] }
 tokio = "0.2.0-alpha.1"
 chrono = "*"
+dotenv = "*"
+iron = "*"
+
+[dependencies.maud]
+version = "*"
+features = ["iron"]
+
+[dependencies.diesel]
+version = "1.4.2"
+features = ["postgres","chrono","r2d2"]
