@@ -93,7 +93,7 @@ def parse_dotinfo_page(content, scraped_at = Time.now)
     end
     convenient_title = post.at_css(".post_content .post_date span[title]")
     help = nil
-    if !convenient_title.nil? && /^\d\d-\d\d-\d\d\d\d$/.match(convenient_title.attributes["title"].value).nil?
+    if !convenient_title.nil? && /^(\d\d-\d\d-\d\d\d\d|\d\d\d\d-\d\d-\d\d)$/.match(convenient_title.attributes["title"].value).nil?
       post_time = convenient_title.attributes["title"].value
     else
       if !convenient_title.nil?
@@ -143,6 +143,9 @@ def parse_dotinfo_post_time(text, scraped_at = Time.now, help = nil)
     res[:posted_at] = Time.parse $2 + " +0000", day
   when /(\d\d-\d\d-\d\d\d\d), (\d\d:\d\d(:\d\d)? (AM|PM)?)/i
     date = Time.strptime($1, "%m-%d-%Y")
+    res[:posted_at] = Time.parse ($2 + " +0000"), date
+  when /(\d\d\d\d-\d\d-\d\d), (\d\d:\d\d(:\d\d)? (AM|PM)?)/i
+    date = Time.strptime($1, "%Y-%m-%d")
     res[:posted_at] = Time.parse ($2 + " +0000"), date
   else
     raise "Could not parse post time #{text.inspect} :("
