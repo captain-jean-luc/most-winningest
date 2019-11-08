@@ -1,10 +1,10 @@
 #![feature(type_ascription)]
 #[macro_use] extern crate diesel;
 
-use std::convert::{TryFrom, TryInto};
+use std::convert::TryInto;
 use std::collections::HashMap;
 use select::document::Document;
-use select::predicate::{Predicate, Attr, Class, Name, Child, Element};
+use select::predicate::{Predicate, Attr, Name, /*Class, Child, Element*/};
 use diesel::prelude::*;
 use chrono::Utc;
 
@@ -125,15 +125,15 @@ async fn page_into_db(cli: &reqwest::Client, conn: &diesel::PgConnection, page_n
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv::dotenv().unwrap();
-    let password = std::env::var("MW_PASSWORD").unwrap();
-    let pg_url = std::env::var("DATABASE_URL").unwrap();
+    let password = std::env::var("MW_PASSWORD").expect("Missing MW_PASSWORD");
+    let pg_url = std::env::var("DATABASE_URL").expect("Missing DATABASE_URL");
     let conn = diesel::PgConnection::establish(&pg_url).unwrap();
     
     let cli = reqwest::ClientBuilder::new()
         .cookie_store(true)
         .gzip(true)
         .referer(false)
-        .timeout(core::time::Duration::from_secs(10))
+        .timeout(core::time::Duration::from_secs(30))
         .build()?;
 
     let login_get_url = "https://community.tulpa.info/member.php?action=login";
@@ -208,14 +208,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let set_rowid:i32 = diesel::insert_into(standings_sets::table).values(standings_sets::dsl::ty.eq("System")).returning(schema::standings_sets::dsl::rowid).get_result(&conn).unwrap();
 
+    let manual_fixings:HashMap<&'static str, &'static str> = [
+        ( "Snow", "jean-luc" ),
+        ( "HenHenry", "jean-luc" ),
+    ].iter().cloned().collect();
     let ids = standings.keys().map(|k| *k).collect():Vec<_>;
     for id in ids {
         let master;
         let sub_standing;
         {
             let (ref mut sub_standing_ref, ref master_ref) = standings.get_mut(&id).unwrap();
+            // if &sub_standing_ref.name == "Snow" {
+            //     dbg!(&sub_standing_ref, &master_ref);
+            // }
             sub_standing_ref.set_rowid = set_rowid;
-            master = master_ref.as_ref().map(|s| s.to_owned());
+            master = master_ref.as_ref().map(|s| s.to_owned()).or(manual_fixings.get(sub_standing_ref.name.as_str()).map(|s| (*s).to_string()));
             sub_standing = sub_standing_ref.clone();
         }
         if let Some(name) = master {

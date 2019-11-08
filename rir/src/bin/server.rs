@@ -1,6 +1,9 @@
 #![feature(proc_macro_hygiene, type_ascription)]
 #[macro_use] extern crate diesel;
 #[macro_use] extern crate maud;
+#[macro_use] extern crate phf;
+
+use chrono::{DateTime, Utc};
 
 mod schema {
     include!("../schema.rs");
@@ -17,6 +20,23 @@ use diesel::r2d2;
 use iron::prelude::*;
 use iron::status;
 use maud::{DOCTYPE,PreEscaped};
+
+//darn people with long names
+static NAME_REPLACEMENTS: phf::Map<&'static str, &'static str> = phf_map! {
+    "theimaginationborders" => "tib",
+    "TheCrawlingCreepypasta" => "TCC",
+    "NateAndTheTulpaTrio" => "Nate",
+    "Quetzal the furdragon" => "Quetzal",
+    "psychologicalKitty-Cat" => "pK-C",
+    "EmilyisMYworld1202" => "EiMw1202",
+    "ShadowTheFluffhog" => "Shadow",
+    "SoulslikeSpiderlegs" => "SlSl",
+    "fountain_and_flame" => "f&f",
+    "AvengedSevenfold" => "Avenged7x",
+    "RazzleDazzleDorito" => "RDD",
+    "JackTheRadiaution" => "Jack",
+    "MariaTheFictionkin" => "Maria",
+};
 
 #[derive(Debug, Clone, Queryable)]
 struct Standing {
@@ -44,11 +64,12 @@ fn display_time(accrued_time:i32) -> String {
 
 fn main() {
     dotenv::dotenv().unwrap();
-    let pg_url = std::env::var("DATABASE_URL").unwrap();
+    let pg_url = std::env::var("DATABASE_URL").expect("Missing DATABASE_URL environment variable.");
     let manager = r2d2::ConnectionManager::new(pg_url.as_str());
     let pool:DBPool = r2d2::Pool::new(manager).unwrap();
 
     fn display_standing(s: &Standing, is_indiv: bool, rank: u32) -> maud::Markup {
+        let maybe_replacement_name = NAME_REPLACEMENTS.get( s.name.as_str() );
         html! {
             tr.indiv[is_indiv].syste[!is_indiv] {
                 @if s.is_anon {
@@ -56,27 +77,59 @@ fn main() {
                 } @else {
                     td align="right" { (rank) "." }
                 }
-                td align="right" { (s.name) }
-                td align="right" { (display_time(s.accrued_time)) }
+                td align="right" {
+                    .name {
+                        @if let Some(replacement_name) = maybe_replacement_name {
+                            abbr title=(s.name) { (replacement_name) }
+                        } @else {
+                            (s.name)
+                        }
+                    }
+                }
+                td align="right" { 
+                    .display_time { (display_time(s.accrued_time)) }
+                }
                 td align="right" { (s.post_count) }
             }
         }
     }
 
-    let listen_spec = std::env::var("LISTEN").unwrap();
-    let _server = Iron::new(move |_: &mut Request| {
+    let listen_spec = std::env::var("LISTEN").expect("Missing LISTEN environment variable, should be in the form address:port");
+    let _server = Iron::new(move |req: &mut Request| {
+        if req.method != iron::method::Method::Get || req.url.path() != vec![""] {
+            return Ok(Response::with((status::NotFound, "Not found")));
+        }
         let conn = pool.get().unwrap();
-        let indiv_set_rowid:i32 = standings_sets::table.filter(standings_sets::dsl::ty.eq("Individual").and(standings_sets::dsl::finished_at.is_not_null())).order(standings_sets::dsl::finished_at.desc()).select(standings_sets::dsl::rowid).get_result(&conn).unwrap();
-        let syste_set_rowid:i32 = standings_sets::table.filter(standings_sets::dsl::ty.eq("System"    ).and(standings_sets::dsl::finished_at.is_not_null())).order(standings_sets::dsl::finished_at.desc()).select(standings_sets::dsl::rowid).get_result(&conn).unwrap();
-        let indiv_standings:Vec<Standing> = standings::table.filter(standings::dsl::set_rowid.eq(indiv_set_rowid)).order((standings::dsl::is_anon, standings::dsl::accrued_time.desc())).get_results(&conn).unwrap();
-        let syste_standings:Vec<Standing> = standings::table.filter(standings::dsl::set_rowid.eq(syste_set_rowid)).order((standings::dsl::is_anon, standings::dsl::accrued_time.desc())).get_results(&conn).unwrap();
+        let (indiv_set_rowid, indiv_upd):(i32,Option<DateTime<Utc>>) = 
+            standings_sets::table
+            .filter(standings_sets::dsl::ty.eq("Individual").and(standings_sets::dsl::finished_at.is_not_null()))
+            .order(standings_sets::dsl::finished_at.desc())
+            .select((standings_sets::dsl::rowid, standings_sets::dsl::finished_at))
+            .get_result(&conn).unwrap();
+        let (syste_set_rowid, syste_upd):(i32,Option<DateTime<Utc>>) = 
+            standings_sets::table
+            .filter(standings_sets::dsl::ty.eq("System"    ).and(standings_sets::dsl::finished_at.is_not_null()))
+            .order(standings_sets::dsl::finished_at.desc())
+            .select((standings_sets::dsl::rowid, standings_sets::dsl::finished_at))
+            .get_result(&conn).unwrap();
+        let indiv_standings:Vec<Standing> = standings::table
+            .filter(standings::dsl::set_rowid.eq(indiv_set_rowid))
+            .order((standings::dsl::is_anon, standings::dsl::accrued_time.desc()))
+            .get_results(&conn).unwrap();
+        let syste_standings:Vec<Standing> = standings::table
+            .filter(standings::dsl::set_rowid.eq(syste_set_rowid))
+            .order((standings::dsl::is_anon, standings::dsl::accrued_time.desc()))
+            .get_results(&conn).unwrap();
+        let last_updated = std::cmp::min(indiv_upd.unwrap(),syste_upd.unwrap());
         let markup = html! {
             (DOCTYPE)
             html {
                 head {
                     (PreEscaped(r#"<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">"#))
                     style {
-                        ".indiv { display: none }
+                        "
+                        .name { display: inline-block; }
+                        .indiv { display: none }
                         #show_indiv:checked ~ table .syste { display: none }
                         #show_indiv:checked ~ table .indiv { display: table-row }"
                     }
@@ -85,19 +138,23 @@ fn main() {
                 body {
                     .container {
                         h1 { "LOTPW Stats" }
-                        p { r#"Any time that "Anonymous" has accrued is at the bottom. Updated every minute"# }
+                        p { 
+                            r#"Any time that "Anonymous" has accrued is at the bottom. Updated every minute, hopefully. Last updated "#
+                            ( last_updated.to_rfc3339_opts(chrono::SecondsFormat::Secs, true) )
+                            "."
+                        }
                         hr {}
                         input#show_indiv type="checkbox" {}
                         label for="show_indiv" {
                             ( maud::PreEscaped("&nbsp;") )
                             "Show individual scores"
                         }
-                        table.table.table-striped.table-bordered.table-hover.table.sm {
+                        table.table.table-striped.table-bordered.table-hover.table-sm {
                             thead {
                                 tr {
                                     th { "Rank" }
                                     th { "Name" }
-                                    th style="min-width:8em" { "Time" }
+                                    th style="min-width:8.3em" { "Time" }
                                     th { "Posts" }
                                 }
                             }

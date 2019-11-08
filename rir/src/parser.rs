@@ -1,7 +1,7 @@
 use chrono::Utc;
 use select::node::Node;
 use select::document::Document;
-use select::predicate::{Predicate, Attr, Class, Name, Child, Element};
+use select::predicate::{Predicate, Class, Name, Element, /*Attr, Child,*/};
 
 use std::num::NonZeroU32;
 
@@ -175,7 +175,15 @@ impl From<Node<'_>> for Post {
                     }
                 }
             }
+            // if let User::Known{ref name, id: _} = user {
+            //     if name == "Snow" {
+            //         dbg!(author_stats_el.inner_html());
+            //         std::process::exit(1);
+            //     }
+            // }
         }
+
+        
 
         Post{
             id,
