@@ -1,7 +1,7 @@
 *~
 *.gem
 *.rbc
-/.config
+/old-ruby/.config
 /coverage/
 /InstalledFiles
 /pkg/
@@ -48,19 +48,17 @@ build-iPhoneSimulator/
 # .ruby-gemset
 
 # unless supporting rvm < 1.11.0 or doing something fancy, ignore this:
-.rvmrc
+/old-ruby/.rvmrc
 
-/pages/*
-!/pages/.keep
-/most-winning-result*
-/most-winning-*.txt
-/pages*.tar
-/pages*.tar.gz
-/pages*.tar.xz
-/pages*.tar.bz2
-/pages*.tar.lrz
-/trash/*
+/old-ruby/pages/*
+!/old-ruby/pages/.keep
+/old-ruby/pages*.tar
+/old-ruby/pages*.tar.gz
+/old-ruby/pages*.tar.xz
+/old-ruby/pages*.tar.bz2
+/old-ruby/pages*.tar.lrz
+/old-ruby/trash/*
 
-/rir/target
-/rir/.env
-/rir/trash
+/target
+/.env
+/trash

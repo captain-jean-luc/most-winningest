@@ -1,0 +1,211 @@
+211.              Azure_Flame:   0d 00h 01m
+210.                     Topy:   0d 00h 01m
+209.          wickerman proxy:   0d 00h 01m
+208.                    Laach:   0d 00h 02m
+207.           Tulpa initiate:   0d 00h 02m
+206.           Inkjet Printer:   0d 00h 02m
+205.           Worst Username:   0d 00h 02m
+204.                    Cacuu:   0d 00h 03m
+203.                      omv:   0d 00h 03m
+202.                 pagedMov:   0d 00h 04m
+201.                  Akecalo:   0d 00h 04m
+200.                     Yuki:   0d 00h 05m
+199.               juasjuasie:   0d 00h 05m
+198.                Lone Wolf:   0d 00h 06m
+197.            superhelicase:   0d 00h 07m
+196.                   Aerkyn:   0d 00h 08m
+195.                     Zaya:   0d 00h 09m
+194.                 Ohmeghon:   0d 00h 11m
+193.                  Desmond:   0d 00h 13m
+192.                    Jakob:   0d 00h 13m
+191.       fountain_and_flame:   0d 00h 16m
+190.               stonetears:   0d 00h 17m
+189.                 konrad13:   0d 00h 18m
+188.                  Chadack:   0d 00h 18m
+187.                   Joshua:   0d 00h 22m
+186.                    Frost:   0d 00h 25m
+185.                       CT:   0d 00h 25m
+184.           The-Transcoder:   0d 00h 31m
+183.                     1369:   0d 00h 31m
+182.                  Scott Z:   0d 00h 31m
+181.                    Vrael:   0d 00h 33m
+180.              Kyo_Tamashi:   0d 00h 35m
+179.                 Ponytail:   0d 00h 37m
+178.                    Natek:   0d 00h 43m
+177.               Mel Syreth:   0d 00h 43m
+176.                 Argentum:   0d 00h 47m
+175.                    Irish:   0d 00h 50m
+174.             Paul and HJP:   0d 00h 53m
+173.               Yamochix91:   0d 00h 54m
+172.                     Enik:   0d 00h 54m
+171.                madA12345:   0d 00h 57m
+170.            Whitegemgames:   0d 00h 59m
+169.                Crescendo:   0d 00h 59m
+168.                  Lucyloo:   0d 01h 00m
+167.                  peacrab:   0d 01h 08m
+166.                   Purlox:   0d 01h 14m
+165.                     June:   0d 01h 14m
+164.                 Zozoquez:   0d 01h 17m
+163.                     Sail:   0d 01h 21m
+162.         AvengedSevenfold:   0d 01h 27m
+161.                    Mosta:   0d 01h 30m
+160.              radicalbenx:   0d 01h 44m
+159.            FurryBlueNaki:   0d 01h 44m
+158.                 cober101:   0d 01h 46m
+157.                    AnFer:   0d 01h 52m
+156.          Visitant System:   0d 02h 01m
+155.                     Tect:   0d 02h 10m
+154.                      Jet:   0d 02h 11m
+153.              arcanemagic:   0d 02h 13m
+152.                    Spice:   0d 02h 38m
+151.             Camwoodstock:   0d 02h 53m
+150.                   Sceena:   0d 02h 56m
+149.                 Bunnison:   0d 03h 10m
+148.                 DevSynth:   0d 03h 14m
+147.                   aqn627:   0d 03h 20m
+146.             Grockstar124:   0d 03h 22m
+145.                  Raymond:   0d 03h 27m
+144.                     Meti:   0d 03h 30m
+143.            Biotechnology:   0d 03h 34m
+142.                    Kovyx:   0d 03h 34m
+141.                    Serif:   0d 03h 34m
+140.                Ms. Spice:   0d 03h 35m
+139.              ItsSwissmas:   0d 03h 48m
+138.                  Charmed:   0d 04h 06m
+137.                  Michael:   0d 04h 09m
+136.                   Silvia:   0d 04h 21m
+135.                   glint4:   0d 04h 24m
+134.                   Indigo:   0d 04h 27m
+133.          DeterminedSOULs:   0d 04h 28m
+132.               Melisandre:   0d 04h 29m
+131.                SparrowNR:   0d 04h 31m
+130.                 Ganymede:   0d 04h 32m
+129.                  Corazón:   0d 04h 53m
+128.        Cat_ShadowGriffin:   0d 05h 01m
+127.                  Lucinda:   0d 05h 11m
+126.      SoulslikeSpiderlegs:   0d 05h 48m
+125.                Heckhound:   0d 05h 48m
+124.              MindsMatter:   0d 06h 19m
+123.             raymond13557:   0d 06h 24m
+122.    Quetzal the furdragon:   0d 06h 28m
+121.                Aphellion:   0d 06h 30m
+120.          differentname22:   0d 06h 32m
+119.       Some Kind Of Robot:   0d 06h 36m
+118.            Andrew Powers:   0d 06h 46m
+117.                     Amon:   0d 06h 47m
+116.                 PyroNeko:   0d 06h 53m
+115.             TheSanctuary:   0d 07h 04m
+114.                  Lacquer:   0d 07h 04m
+113.              ThunderClap:   0d 07h 06m
+112.       RazzleDazzleDorito:   0d 07h 11m
+111.                      Clo:   0d 08h 00m
+110.              When I Fail:   0d 08h 01m
+109.                     geru:   0d 08h 09m
+108.                Zyglotopy:   0d 08h 26m
+107.                      Sen:   0d 08h 31m
+106.                    Ghang:   0d 08h 32m
+105.              Cinemaphobe:   0d 08h 44m
+104.                   Hidari:   0d 08h 45m
+103.        Their Best Friend:   0d 09h 14m
+102.               RailOfFire:   0d 09h 21m
+101.   TheCrawlingCreepypasta:   0d 09h 21m
+100.            Megan and Aki:   0d 09h 22m
+099.                  Furries:   0d 09h 24m
+098.      Mary's little lambs:   0d 09h 59m
+097.               Th3 Spratt:   0d 10h 11m
+096.                 GuessWho:   0d 10h 46m
+095.                   Piaapo:   0d 11h 17m
+094.            ClianthaMiura:   0d 11h 32m
+093.                  Kiahdaj:   0d 11h 35m
+092.         Two-tailed-tulpa:   0d 12h 07m
+091.        JackTheRadiaution:   0d 12h 07m
+090.                     Trix:   0d 12h 08m
+089.               Tasuke1993:   0d 12h 50m
+088.       MariaTheFictionkin:   0d 13h 11m
+087.                      War:   0d 13h 24m
+086.                    Alpha:   0d 13h 57m
+085.                     Ivy_:   0d 14h 12m
+084.                    Ennui:   0d 14h 28m
+083.                    Feast:   0d 14h 31m
+082.                   Sebrek:   0d 14h 34m
+081.                     Sesq:   0d 14h 48m
+080.                     King:   0d 14h 49m
+079.                   Samuel:   0d 14h 57m
+078.                  LostOne:   0d 15h 00m
+077.          Mechagodzilla82:   0d 15h 24m
+076.                Kitsukrou:   0d 15h 32m
+075.                   Saylin:   0d 16h 07m
+074.                    STeeK:   0d 16h 10m
+073.           FadingSpectrum:   0d 18h 24m
+072.                Catherine:   0d 20h 06m
+071.               KipKitsune:   0d 21h 53m
+070.            LondonWindsor:   0d 21h 55m
+069.               mattmanlex:   0d 22h 20m
+068.            KarlYoshimura:   0d 22h 38m
+067.      NateAndTheTulpaTrio:   0d 23h 09m
+066.                     Floh:   0d 23h 57m
+065.                  Auratic:   1d 02h 55m
+064.               DragonHost:   1d 04h 07m
+063.                fordaplot:   1d 05h 32m
+062.                 Nachtara:   1d 10h 49m
+061.                BubblePop:   1d 12h 37m
+060.                   kolopo:   1d 12h 46m
+059.                   Raven_:   1d 14h 05m
+058.             SvenniTheCat:   1d 15h 12m
+057.               Cold Blitz:   1d 15h 13m
+056.                      Cél:   1d 16h 15m
+055.                  Flandre:   1d 16h 25m
+054.             Kaz with a K:   1d 16h 59m
+053.           Naturegirl1999:   1d 17h 45m
+052.               Lumanatrix:   1d 18h 00m
+051.            King of Manga:   1d 18h 10m
+050.                     Luxi:   1d 20h 44m
+049.                     Anko:   1d 21h 11m
+048.                  Indigo`:   1d 22h 44m
+047.                   Reisen:   2d 00h 49m
+046.             solarchariot:   2d 07h 05m
+045.          emptysketchbook:   2d 09h 03m
+044.                   Muffin:   2d 12h 01m
+043.                    Tacio:   2d 12h 35m
+042.                    Pleeb:   2d 13h 33m
+041.                    Bosun:   2d 13h 55m
+040.                     Near:   2d 15h 52m
+039.              LukeDude759:   2d 21h 48m
+038.               SageDaBear:   2d 22h 02m
+037.                 HenHenry:   2d 23h 02m
+036.                Procron X:   3d 03h 12m
+035.                      God:   3d 16h 02m
+034.                 Actinium:   3d 22h 51m
+033.                     Joss:   4d 15h 59m
+032.                 Metatron:   4d 17h 23m
+031.            Doctorfoxwolf:   5d 01h 20m
+030.              Dreadwing93:   5d 11h 33m
+029.                    Piano:   5d 13h 24m
+028.                  Beatles:   5d 15h 40m
+027.                  Vampire:   5d 23h 35m
+026.                kociara81:   6d 16h 59m
+025.               LifeInside:   7d 12h 34m
+024.                  | Eva |:   7d 12h 45m
+023.                   Apollo:   7d 17h 05m
+022.    theimaginationborders:   8d 18h 58m
+021.              LittleTulpa:   8d 23h 56m
+020.           AttackDoughnut:   9d 07h 21m
+019.                Wolf31611:   9d 11h 11m
+018.                     Tewi:  11d 13h 55m
+017.                   Aurora:  12d 23h 19m
+016.             NoneFromHell:  13d 14h 54m
+015.                Linkzelda:  16d 04h 42m
+014.                  Douglas:  19d 17h 35m
+013.           Gryphon Flight:  21d 00h 25m
+012.                   Stevie:  21d 23h 56m
+011.                  Ska'ale:  26d 12h 09m
+010.                Luminesce:  27d 17h 08m
+009.                     Rævn:  29d 19h 06m
+008.                      Vos:  33d 00h 01m
+007.                  Lucilyn:  41d 03h 02m
+006.                 Freedom1:  43d 09h 34m
+005.                 tulpa001:  48d 14h 48m
+004.           Paranoid Llama:  60d 04h 42m
+003.            SomethingDire: 138d 05h 39m
+002.                 jean-luc: 281d 15h 48m
+001.                  Brassow: 303d 03h 16m
