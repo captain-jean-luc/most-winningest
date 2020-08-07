@@ -145,9 +145,7 @@ fn main() {
                         }
                         hr/
                         p {
-                            "2020-02-15: This has now been updated to support the new forum software, however the new forum does not show linked accounts, so all scores are now individual scores."
-                            br/
-                            "2020-08-07: Programming is hard. We're back."
+                            "2020-08-07: This has now been updated to support the new forum software, however the new forum does not show linked accounts, so all scores are now individual scores."
                         }
                         hr/
                         input#show_indiv type="checkbox" checked? disabled?{}
