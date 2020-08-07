@@ -143,8 +143,14 @@ fn main() {
                             ( last_updated.to_rfc3339_opts(chrono::SecondsFormat::Secs, true) )
                             "."
                         }
-                        hr {}
-                        input#show_indiv type="checkbox" {}
+                        hr/
+                        p {
+                            "2020-02-15: This has now been updated to support the new forum software, however the new forum does not show linked accounts, so all scores are now individual scores."
+                            br/
+                            "2020-08-07: Programming is hard. We're back."
+                        }
+                        hr/
+                        input#show_indiv type="checkbox" checked? disabled?{}
                         label for="show_indiv" {
                             ( maud::PreEscaped("&nbsp;") )
                             "Show individual scores"
@@ -159,15 +165,17 @@ fn main() {
                                 }
                             }
                             tbody {
-                                @let mut count = 1;
-                                @for standing in &syste_standings {
-                                    ( display_standing(standing, false, count) )
-                                    @if !standing.is_anon {
-                                        ( { count += 1; ""} )
+                                @if false {
+                                    @let mut count = 1;
+                                    @for standing in &syste_standings {
+                                        ( display_standing(standing, false, count) )
+                                        @if !standing.is_anon {
+                                            ( { count += 1; ""} )
+                                        }
                                     }
-                                }
-                                @if syste_standings.len() % 2 == 1 {
-                                    tr style="display:none" {}
+                                    @if syste_standings.len() % 2 == 1 {
+                                        tr style="display:none" {}
+                                    }
                                 }
                                 @let mut count = 1;
                                 @for standing in &indiv_standings {

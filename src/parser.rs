@@ -1,7 +1,9 @@
 use chrono::Utc;
+use chrono::offset::TimeZone;
 use select::node::Node;
 use select::document::Document;
-use select::predicate::{Predicate, Class, Name, Element, /*Attr, Child,*/};
+use select::predicate::{Predicate, Class, Name, Element, Attr, Child, Descendant};
+use serde::Deserialize;
 
 use std::num::NonZeroU32;
 
@@ -9,25 +11,26 @@ use std::num::NonZeroU32;
 pub struct Page {
     pub page_count: NonZeroU32,
     pub page_current: NonZeroU32,
-    pub page_first: Option<NonZeroU32>,
-    pub page_last: Option<NonZeroU32>,
+    // pub page_first: Option<NonZeroU32>,
+    // pub page_last: Option<NonZeroU32>,
     pub pages: Vec<NonZeroU32>,
     pub posts: Vec<Post>,
 }
 
 impl Page {
-    pub fn last_page(&self) -> NonZeroU32 { 
-        let mut all_pages = self.pages.clone();
-        all_pages.push(self.page_current);
-        if let Some(n) = self.page_first { all_pages.push(n) }
-        if let Some(n) = self.page_last  { all_pages.push(n) }
-        all_pages.sort_unstable();
+    // pub fn last_page(&self) -> NonZeroU32 { 
+    //     let mut all_pages = self.pages.clone();
+    //     all_pages.push(self.page_current);
+    //     if let Some(n) = self.page_first { all_pages.push(n) }
+    //     if let Some(n) = self.page_last  { all_pages.push(n) }
+    //     all_pages.sort_unstable();
 
-        *all_pages.last().unwrap()
-    }
+    //     *all_pages.last().unwrap()
+    // }
 
     pub fn is_last_page(&self) -> bool {
-        self.last_page() == self.page_current
+        // self.last_page() == self.page_current
+        self.page_current == self.page_count
     }
 }
 
@@ -53,33 +56,27 @@ fn strip_both_expecting<'a>(expect_begin: &'a str, thing: &'a str, expect_end: &
 
 impl From<Document> for Page {
     fn from(document: Document) -> Page {
-        let pagination_el = document.find(Class("pagination")).next().unwrap();
-        let pages_el = pagination_el.find(Class("pages")).next().unwrap();
-        let pages_el_text = pages_el.text();
-        let page_text = strip_both_expecting("Pages (",pages_el_text.trim(),"):");
-        let page_count = page_text.parse().unwrap();
-        let page_current = pagination_el.find(Class("pagination_current")).next().unwrap().text().trim().parse().unwrap();
-        let page_first = pagination_el.find(Class("pagination_first")).next().map(|e| e.text().trim().parse().unwrap());
-        let page_last = pagination_el.find(Class("pagination_last")).next().map(|e| e.text().trim().parse().unwrap());
+        let pagination_el = document.find(Class("ipsPagination")).next().unwrap();
+        let page_count = pagination_el.attr("data-pages").unwrap().parse().unwrap();
+        let page_current = pagination_el.find(Class("ipsPagination_active")).next().unwrap().text().trim().parse().unwrap();
+        // let page_first = pagination_el.find(Class("pagination_first")).next().map(|e| e.text().trim().parse().unwrap());
+        // let page_last = pagination_el.find(Class("pagination_last")).next().map(|e| e.text().trim().parse().unwrap());
 
         let mut pages = Vec::new();
-        for page_el in pagination_el.find(Class("pagination_page")) {
-            pages.push(page_el.text().trim().parse().unwrap())
+        for page_el in pagination_el.find(Class("ipsPagination_page")) {
+            // dbg!(page_el.html());
+            let a = page_el.first_child().unwrap().attr("data-page").unwrap();
+            let b = a.parse().unwrap();
+            pages.push(b);
         }
 
         let mut posts = Vec::new();
-        for node in document.find(Class("post")){
-            if let Some(val) = node.attr("id") {
-                if val.starts_with("post_") {
-                    posts.push(Post::from(node));
-                }
-            }
+        for node in document.find(Name("article").and(Class("cPost"))){
+            posts.push(Post::from(node));
         }
         Page{
             page_count,
             page_current,
-            page_first,
-            page_last,
             pages,
             posts,
         }
@@ -97,91 +94,138 @@ pub struct Post {
     pub id:u32,
     pub num:u32,
     pub user:User,
-    pub post_content:String,
+    //pub post_content:String,
     pub posted_at:chrono::DateTime<Utc>,
-    pub is_master_account:bool, //true for anon
-    pub linked_accounts:Vec<(String,bool)>,
+    //pub is_master_account:bool, //true for anon
+    //pub linked_accounts:Vec<(String,bool)>,
 }
 
 impl From<Node<'_>> for Post {
     fn from(n: Node<'_>) -> Post {
-        let id = strip_begin_expecting(n.attr("id").unwrap(), "post_").parse().unwrap();
-        let author_info_el = n.find(Class("post_author")).next().unwrap();
+        let name_el = n.find(
+            Descendant(
+                Child(
+                    (
+                        Name("aside")
+                    ).and(
+                        Class("cAuthorPane")
+                    ),
+                    (
+                        Name("h3")
+                    ).and(
+                        Class("cAuthorPane_author")
+                    )
+                ),
+                Name("strong")
+            )
+        ).next().unwrap();
 
-        let content_el = n.find(Class("post_content")).next().unwrap();
+        let id = strip_begin_expecting(n.attr("id").unwrap(), "elComment_").parse().unwrap();
 
-        let controls = n.find(Class("post_controls")).next().unwrap();
+        let num = {
+            let mut a = n.find(Class("ipsComment_tools"));
+            let b = a.next().unwrap();
+            // dbg!(b.html());
+            let c = b.find(Name("li")).last();
+            let d = c.unwrap();
+            // dbg!(d);
+            let e = d.text();
+            // dbg!(&e);
+            let f = e.trim();
+            // dbg!(f);
+            strip_begin_expecting(f, "#").parse().unwrap()
+        };
+
+        // let author_info_el = n.find(Class("post_author")).next().unwrap();
+
+        // let content_el = n.find(Class("post_content")).next().unwrap();
+
+        // let controls = n.find(Class("post_controls")).next().unwrap();
 
         let user;
-        if let Some(el) = controls.find(Class("postbit_find")).next() {
-            let id = strip_begin_expecting(el.attr("href").unwrap(), "search.php?action=finduser&uid=").parse().unwrap();
-            let author_information_el = author_info_el.find(Class("author_information")).next().unwrap();
-            let name = author_information_el.find(Name("span")).next().unwrap().text().trim().to_owned();
+        if let Some(a) = name_el.find(Name("a")).next() {
+            let id:u64 = strip_begin_expecting(a.attr("href").unwrap(), "https://community.tulpa.info/profile/").split('-').next().unwrap().parse().unwrap();
+            let name = name_el.text().trim().to_owned();
             user = User::Known{id, name};
         } else {
             user = User::Anonymous;
         }
 
-        let post_content = content_el.find(Class("post_body")).next().unwrap().text().trim().to_owned();
-
-        let post_head = content_el.find(Class("post_head")).next().unwrap();
-        let num = post_head.find(Class("float_right")).next().unwrap().text().trim().replace('#', "").replace(',', "").parse().unwrap();
-        let post_date = post_head.find(Class("post_date")).next().unwrap();
-        let mut posted_at_string = String::new();
-        for child in post_date.children() {
-            if let Some(text) = child.as_text() {
-                posted_at_string.push_str(text);
-            }else if child.is(Class("post_edit")) {
-                // do nothing
-            }else if child.is(Name("span")) {
-                posted_at_string.push_str(child.attr("title").unwrap());
-            }
+        #[derive(Debug,Deserialize)]
+        struct QuoteData{
+            pub userid:Option<u64>,
+            pub username:Option<String>,
+            pub timestamp:i64,
+            // pub contentapp:String,
+            // pub contenttype:String,
+            // pub contentid:u64,
+            // pub contentclass:String,
+            // pub contentcommentid:u64,
         }
+
+        let comment_wrap_el = n.find(Attr("data-quotedata",())).next().unwrap();
+        let qd:QuoteData = serde_json::from_str(&comment_wrap_el.attr("data-quotedata").unwrap()).unwrap();
+
+        // let post_content = content_el.find(Class("post_body")).next().unwrap().text().trim().to_owned();
+
+        // let post_head = content_el.find(Class("post_head")).next().unwrap();
+        // let num = post_head.find(Class("float_right")).next().unwrap().text().trim().replace('#', "").replace(',', "").parse().unwrap();
+        // let post_date = post_head.find(Class("post_date")).next().unwrap();
+        // let mut posted_at_string = String::new();
+        // for child in post_date.children() {
+        //     if let Some(text) = child.as_text() {
+        //         posted_at_string.push_str(text);
+        //     }else if child.is(Class("post_edit")) {
+        //         // do nothing
+        //     }else if child.is(Name("span")) {
+        //         posted_at_string.push_str(child.attr("title").unwrap());
+        //     }
+        // }
         
         //dbg!(posted_at_string.trim());
-        let ndt = chrono::NaiveDateTime::parse_from_str(posted_at_string.trim(), "%Y-%m-%d, %H:%M").unwrap();
-        let posted_at = chrono::DateTime::<Utc>::from_utc(ndt, Utc);
+        // let ndt = chrono::NaiveDateTime::parse_from_str(posted_at_string.trim(), "%Y-%m-%d, %H:%M").unwrap();
+        let posted_at = Utc.timestamp(qd.timestamp,0);
 
-        let mut is_master_account = true;
-        let mut linked_accounts = Vec::new();
-        if let User::Anonymous = user {
-            is_master_account = true;
-        }else{
-            let author_stats_el = author_info_el.find(Class("author_statistics")).next().unwrap();
-            for node in author_stats_el.children() {
-                if let Some(val) = node.attr("id") {
-                    if val.trim().starts_with("aj_postuser_") {
-                        //the <n> Attached Accounts or Linked Accounts
-                    } else if val.trim().starts_with("aj_postbit_") {
-                        let head_text_uncut = node.find(Class("thead")).next().unwrap().text();
-                        let head_text = head_text_uncut.trim();
-                        if head_text == "Linked Accounts" {
-                            is_master_account = false
-                        } else if head_text == "Attached Accounts" {
-                            is_master_account = true
-                        }
-                        let juicy_content = node.find(Class("trow1").or(Class("trow2"))).next().unwrap();
-                        for li in juicy_content.find(Name("li")) {
-                            let mut things = li.find(Element);
-                            things.next();
-                            let name_span = things.next().unwrap();
-                            let is_master;
-                            if let Some(val) = name_span.attr("title") {
-                                assert_eq!(val.trim(), "Master Account");
-                                is_master = true;
-                            }else{ is_master = false }
-                            linked_accounts.push((name_span.text().to_owned(), is_master));
-                        }
-                    }
-                }
-            }
-            // if let User::Known{ref name, id: _} = user {
-            //     if name == "Snow" {
-            //         dbg!(author_stats_el.inner_html());
-            //         std::process::exit(1);
-            //     }
-            // }
-        }
+        // let mut is_master_account = true;
+        // let mut linked_accounts = Vec::new();
+        // if let User::Anonymous = user {
+        //     is_master_account = true;
+        // }else{
+        //     let author_stats_el = author_info_el.find(Class("author_statistics")).next().unwrap();
+        //     for node in author_stats_el.children() {
+        //         if let Some(val) = node.attr("id") {
+        //             if val.trim().starts_with("aj_postuser_") {
+        //                 //the <n> Attached Accounts or Linked Accounts
+        //             } else if val.trim().starts_with("aj_postbit_") {
+        //                 let head_text_uncut = node.find(Class("thead")).next().unwrap().text();
+        //                 let head_text = head_text_uncut.trim();
+        //                 if head_text == "Linked Accounts" {
+        //                     is_master_account = false
+        //                 } else if head_text == "Attached Accounts" {
+        //                     is_master_account = true
+        //                 }
+        //                 let juicy_content = node.find(Class("trow1").or(Class("trow2"))).next().unwrap();
+        //                 for li in juicy_content.find(Name("li")) {
+        //                     let mut things = li.find(Element);
+        //                     things.next();
+        //                     let name_span = things.next().unwrap();
+        //                     let is_master;
+        //                     if let Some(val) = name_span.attr("title") {
+        //                         assert_eq!(val.trim(), "Master Account");
+        //                         is_master = true;
+        //                     }else{ is_master = false }
+        //                     linked_accounts.push((name_span.text().to_owned(), is_master));
+        //                 }
+        //             }
+        //         }
+        //     }
+        //     // if let User::Known{ref name, id: _} = user {
+        //     //     if name == "Snow" {
+        //     //         dbg!(author_stats_el.inner_html());
+        //     //         std::process::exit(1);
+        //     //     }
+        //     // }
+        // }
 
         
 
@@ -189,10 +233,10 @@ impl From<Node<'_>> for Post {
             id,
             num,
             user,
-            post_content,
+            //post_content,
             posted_at,
-            linked_accounts,
-            is_master_account,
+            //linked_accounts,
+            //is_master_account,
         }
     }
 }

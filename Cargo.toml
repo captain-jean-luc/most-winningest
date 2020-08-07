@@ -8,13 +8,15 @@ edition = "2018"
 
 [dependencies]
 select = "*"
-futures-preview = { version = "=0.3.0-alpha.19", features = ["async-await"] }
-reqwest = { version = "0.10.0-alpha.1", features = ["gzip", "cookies"] }
-tokio = "0.2.0-alpha.1"
+#futures-preview = { version = "=0.3.0-alpha.19", features = ["async-await"] }
+reqwest = { version = "0.10.6", features = ["gzip", "cookies"] }
+tokio = { version = "*", features = ["full"] }
 chrono = "*"
 dotenv = "*"
 iron = "*"
 phf = { version = "0.7.24", features = ["macros"] }
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
 
 [dependencies.maud]
 version = "*"

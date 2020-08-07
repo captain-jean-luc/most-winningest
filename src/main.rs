@@ -67,9 +67,9 @@ async fn page_into_db(cli: &reqwest::Client, conn: &diesel::PgConnection, page_n
     eprintln!("grabbing {}", page_num);
     let url;
     if page_num == 1 {
-        url = "https://community.tulpa.info/thread-game-last-one-to-post-wins".to_owned();
+        url = "https://community.tulpa.info/topic/7356-game-last-one-to-post-wins/".to_owned();
     } else {
-        url = format!("https://community.tulpa.info/thread-game-last-one-to-post-wins?page={}", page_num);
+        url = format!("https://community.tulpa.info/topic/7356-game-last-one-to-post-wins/page/{}/", page_num);
     }
     let content = cli.get(&url).send().await.unwrap().text().await.unwrap();
     let pageinfo = parser::Page::from(select::document::Document::from(content.as_str()));
@@ -77,7 +77,7 @@ async fn page_into_db(cli: &reqwest::Client, conn: &diesel::PgConnection, page_n
         page_num: pageinfo.page_current.get().try_into().unwrap(),
         body: &content,
         created_at: Utc::now(),
-        is_last_page: pageinfo.page_last.is_none(),
+        is_last_page: pageinfo.is_last_page(),
         valid: true,
         valid_html: true,
     };
@@ -108,10 +108,8 @@ async fn page_into_db(cli: &reqwest::Client, conn: &diesel::PgConnection, page_n
                 username,
                 userid: userid.map(|v| (*v).try_into().unwrap()),
                 posted_at: post.posted_at,
-                linked_accounts: post.linked_accounts.iter().map(|(a,_)| a.clone()).collect(),
-                master_account: post.linked_accounts.iter().find_map(|(v,b)| {
-                    if *b { Some(v.clone()) } else { None }
-                }),
+                linked_accounts: vec![],
+                master_account: None as Option<String>,
             };
             diesel::insert_into(posts::table).values(&ins).execute(conn)?;
         }
@@ -125,7 +123,7 @@ async fn page_into_db(cli: &reqwest::Client, conn: &diesel::PgConnection, page_n
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv::dotenv().unwrap();
-    let password = std::env::var("MW_PASSWORD").expect("Missing MW_PASSWORD");
+    // let password = std::env::var("MW_PASSWORD").expect("Missing MW_PASSWORD");
     let pg_url = std::env::var("DATABASE_URL").expect("Missing DATABASE_URL");
     let conn = diesel::PgConnection::establish(&pg_url).unwrap();
     
@@ -136,25 +134,25 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .timeout(core::time::Duration::from_secs(30))
         .build()?;
 
-    let login_get_url = "https://community.tulpa.info/member.php?action=login";
-    let login_get_resp = cli.get(login_get_url).send().await.unwrap();
-    dbg!(login_get_resp.status());
-    let document = Document::from(login_get_resp.text().await.unwrap().as_str());
-    let login_form = document.find(Name("form").and(Attr("action","member.php"))).next().unwrap();
-    //get fields action, url, and my_post_key
-    let mut fields = login_form.find(Name("input").and(Attr("type","hidden")))
-        .map(|node| (node.attr("name").unwrap_or(""), node.attr("value").unwrap_or("")))
-        .collect::<Vec<_>>();
-    fields.push(("username","jean-luc-bot"));
-    fields.push(("password",&password));
-    fields.push(("remember","yes"));
-    fields.push(("submit","Login"));
+    // let login_get_url = "https://community.tulpa.info/member.php?action=login";
+    // let login_get_resp = cli.get(login_get_url).send().await.unwrap();
+    // dbg!(login_get_resp.status());
+    // let document = Document::from(login_get_resp.text().await.unwrap().as_str());
+    // let login_form = document.find(Name("form").and(Attr("action","member.php"))).next().unwrap();
+    // //get fields action, url, and my_post_key
+    // let mut fields = login_form.find(Name("input").and(Attr("type","hidden")))
+    //     .map(|node| (node.attr("name").unwrap_or(""), node.attr("value").unwrap_or("")))
+    //     .collect::<Vec<_>>();
+    // fields.push(("username","jean-luc-bot"));
+    // fields.push(("password",&password));
+    // fields.push(("remember","yes"));
+    // fields.push(("submit","Login"));
 
-    let login_post = cli.post("https://community.tulpa.info/member.php").form(&fields).send().await?;
-    assert!(login_post.status().is_success());
+    // let login_post = cli.post("https://community.tulpa.info/member.php").form(&fields).send().await?;
+    // assert!(login_post.status().is_success());
     
-    //we don't actually care about the content, but we do want to wait for .info to finish sending the response
-    let _ = login_post.bytes().await;
+    // //we don't actually care about the content, but we do want to wait for .info to finish sending the response
+    // let _ = login_post.bytes().await;
 
     use schema::pages::dsl as p_dsl;
     let last_page = || {
