@@ -129,9 +129,9 @@ fn main() {
                     style {
                         "
                         .name { display: inline-block; }
-                        .indiv { display: none }
+                        /*.indiv { display: none }
                         #show_indiv:checked ~ table .syste { display: none }
-                        #show_indiv:checked ~ table .indiv { display: table-row }"
+                        #show_indiv:checked ~ table .indiv { display: table-row }*/"
                     }
                     title { "LOTPW Stats" }
                 }
