@@ -92,7 +92,7 @@ pub enum User {
 #[derive(Debug, Clone)]
 pub struct Post {
     pub id:u32,
-    pub num:u32,
+    pub num:Option<u32>,
     pub user:User,
     //pub post_content:String,
     pub posted_at:chrono::DateTime<Utc>,
@@ -102,6 +102,7 @@ pub struct Post {
 
 impl From<Node<'_>> for Post {
     fn from(n: Node<'_>) -> Post {
+        // dbg!(n.html());
         let name_el = n.find(
             Descendant(
                 Child(
@@ -133,7 +134,11 @@ impl From<Node<'_>> for Post {
             // dbg!(&e);
             let f = e.trim();
             // dbg!(f);
-            strip_begin_expecting(f, "#").parse().unwrap()
+            if f == "Share" {
+                None
+            } else {
+                Some(strip_begin_expecting(f, "#").parse().unwrap())
+            }
         };
 
         // let author_info_el = n.find(Class("post_author")).next().unwrap();

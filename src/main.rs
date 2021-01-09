@@ -102,9 +102,10 @@ async fn page_into_db(cli: &reqwest::Client, conn: &diesel::PgConnection, page_n
                     userid = Some(id);
                 }
             }
+            let pn:i32 = post.num.map(|a| a.try_into().unwrap()).unwrap_or(0i32);
             let ins = PostIns {
                 pages_rowid: page.rowid,
-                post_num: post.num.try_into().unwrap(),
+                post_num: pn,
                 username,
                 userid: userid.map(|v| (*v).try_into().unwrap()),
                 posted_at: post.posted_at,
