@@ -170,7 +170,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     use valid_posts::dsl as o_dsl;
     let posts:Vec<Post> = o_dsl::valid_posts
-        .order(o_dsl::post_num.desc())
+        .order(o_dsl::posted_at.desc())
         .get_results(&conn)
         .unwrap();
     // let name_to_id = HashMap::<String, i32>::new()
