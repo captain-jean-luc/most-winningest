@@ -3,14 +3,13 @@
 
 use std::convert::TryInto;
 use std::collections::HashMap;
-use select::document::Document;
-use select::predicate::{Predicate, Attr, Name, /*Class, Child, Element*/};
 use diesel::prelude::*;
 use chrono::Utc;
 
 mod parser;
 mod schema;
 mod manual_schema;
+mod generate;
 
 use schema::{pages, posts, standings_sets, standings};
 use manual_schema::{valid_posts};
@@ -32,11 +31,10 @@ struct PageIns<'a> {
 struct Page{
     rowid:i32,
     page_num:i32,
-    body:String,
-    created_at:DT,
-    is_last_page:bool,
-    valid:bool,
-    valid_html:bool,
+}
+
+impl Page {
+    fn cols() -> (pages::rowid, pages::page_num) { (pages::rowid, pages::page_num) }
 }
 
 #[derive(Debug, Insertable)]
@@ -53,14 +51,20 @@ struct PostIns<'a> {
 
 #[derive(Debug, Queryable)]
 struct Post {
-    rowid:i32,
-    pages_rowid:i32,
-    post_num:i32,
     username:String,
     userid:Option<i32>,
     posted_at:DT,
-    linked_accounts: Vec<String>,
     master: Option<String>,
+}
+
+impl Post {
+    // fn cols() -> (posts::username, posts::userid, posts::posted_at, posts::master_account) {
+    //     (posts::username, posts::userid, posts::posted_at, posts::master_account)
+    // }
+
+    fn view_cols() -> (valid_posts::username, valid_posts::userid, valid_posts::posted_at, valid_posts::master_account) {
+        (valid_posts::username, valid_posts::userid, valid_posts::posted_at, valid_posts::master_account)
+    }
 }
 
 async fn page_into_db(cli: &reqwest::Client, conn: &diesel::PgConnection, page_num:i32) -> parser::Page {
@@ -88,7 +92,7 @@ async fn page_into_db(cli: &reqwest::Client, conn: &diesel::PgConnection, page_n
             pages::dsl::valid.eq(false),
             pages::dsl::valid_html.eq(false),
         )).execute(conn)?;
-        let page:Page = diesel::insert_into(pages::table).values(&ins).get_result(conn)?;
+        let page:Page = diesel::insert_into(pages::table).values(&ins).returning(Page::cols()).get_result(conn)?;
         for post in &pageinfo.posts {
             let username;
             let userid;
@@ -157,7 +161,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     use schema::pages::dsl as p_dsl;
     let last_page = || {
-        p_dsl::pages.filter(p_dsl::valid).order(p_dsl::page_num.desc()).limit(1).get_result(&conn).optional().unwrap():Option<Page>
+        p_dsl::pages.select(Page::cols()).filter(p_dsl::valid).order(p_dsl::page_num.desc()).limit(1).get_result(&conn).optional().unwrap():Option<Page>
     };
     let mut next_page = last_page().map(|p| p.page_num).unwrap_or(1);
     loop {
@@ -170,6 +174,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     use valid_posts::dsl as o_dsl;
     let posts:Vec<Post> = o_dsl::valid_posts
+        .select(Post::view_cols())
         .order(o_dsl::posted_at.desc())
         .get_results(&conn)
         .unwrap();
@@ -235,6 +240,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     diesel::insert_into(standings::table).values(standings.values().map(|a| &a.0).collect():Vec<_>).execute(&conn).unwrap();
     diesel::update(standings_sets::table).filter(standings_sets::dsl::rowid.eq(set_rowid)).set(standings_sets::dsl::finished_at.eq(Utc::now())).execute(&conn).unwrap();
+
+    generate::generate();
 
     Ok(())
 }

@@ -2,7 +2,7 @@ use chrono::Utc;
 use chrono::offset::TimeZone;
 use select::node::Node;
 use select::document::Document;
-use select::predicate::{Predicate, Class, Name, Element, Attr, Child, Descendant};
+use select::predicate::{Predicate, Class, Name, Attr, Child, Descendant};
 use serde::Deserialize;
 
 use std::num::NonZeroU32;
@@ -42,17 +42,17 @@ fn strip_begin_expecting<'a>(thing: &'a str, expect:&'a str) -> &'a str {
     }
 }
 
-fn strip_end_expecting<'a>(thing: &'a str, expect:&'a str) -> &'a str {
-    if thing.ends_with( expect ) {
-        return thing.split_at(thing.len() - expect.len()).0
-    }else{
-        panic!("Expecting {:?} at beginning of {:?}", expect, thing);
-    }
-}
+// fn strip_end_expecting<'a>(thing: &'a str, expect:&'a str) -> &'a str {
+//     if thing.ends_with( expect ) {
+//         return thing.split_at(thing.len() - expect.len()).0
+//     }else{
+//         panic!("Expecting {:?} at beginning of {:?}", expect, thing);
+//     }
+// }
 
-fn strip_both_expecting<'a>(expect_begin: &'a str, thing: &'a str, expect_end: &'a str) -> &'a str {
-    strip_begin_expecting(strip_end_expecting(thing, expect_end), expect_begin)
-}
+// fn strip_both_expecting<'a>(expect_begin: &'a str, thing: &'a str, expect_end: &'a str) -> &'a str {
+//     strip_begin_expecting(strip_end_expecting(thing, expect_end), expect_begin)
+// }
 
 impl From<Document> for Page {
     fn from(document: Document) -> Page {
@@ -158,8 +158,8 @@ impl From<Node<'_>> for Post {
 
         #[derive(Debug,Deserialize)]
         struct QuoteData{
-            pub userid:Option<u64>,
-            pub username:Option<String>,
+            // pub userid:Option<u64>,
+            // pub username:Option<String>,
             pub timestamp:i64,
             // pub contentapp:String,
             // pub contenttype:String,
