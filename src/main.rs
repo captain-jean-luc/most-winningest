@@ -136,6 +136,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .cookie_store(true)
         .gzip(true)
         .referer(false)
+        .user_agent("LOTPW stats.jean-luc.org scraper bot by jean-luc")
         .timeout(core::time::Duration::from_secs(30))
         .build()?;
 

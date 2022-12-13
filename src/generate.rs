@@ -132,7 +132,7 @@ pub fn generate() {
                         " and manually imported. No free 10 hours for Felicity."
                     }
                     p { 
-                        r#"Any time that Anonymous/Guest posters have accrued is at the bottom. Updated every hour, hopefully. Last updated "#
+                        r#"Any time that Anonymous/Guest posters have accrued is at the bottom. Updated every once in awhile, hopefully. Last updated "#
                         ( last_updated.to_rfc3339_opts(chrono::SecondsFormat::Secs, true) )
                         "."
                     }
