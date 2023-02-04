@@ -7,7 +7,7 @@ edition = "2018"
 [dependencies]
 select = "0.5"
 reqwest = { version = "0.10.6", features = ["gzip", "cookies"] }
-tokio = { version = "0.2", features = ["full"] }
+tokio = { version = "1.16", features = ["full"] }
 chrono = "0.4.19"
 dotenv = "0.15.0"
 phf = { version = "0.7.24", features = ["macros"] }
