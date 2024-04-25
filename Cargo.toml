@@ -5,7 +5,7 @@ authors = ["Jean-luc <github-commit-email@jean-luc.org>"]
 edition = "2018"
 
 [dependencies]
-select = "0.5"
+select = "0.6.0"
 reqwest = { version = "0.10.6", features = ["gzip", "cookies"] }
 tokio = { version = "0.2", features = ["full"] }
 chrono = "0.4.19"
