@@ -54,7 +54,6 @@ fn display_time(accrued_time:i32) -> String {
 
 pub fn generate() {
     eprintln!("Generating...");
-    dotenv::dotenv().unwrap();
     let pg_url = std::env::var("DATABASE_URL").expect("Missing DATABASE_URL environment variable.");
     let manager = r2d2::ConnectionManager::new(pg_url.as_str());
     let pool:DBPool = r2d2::Pool::new(manager).unwrap();
