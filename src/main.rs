@@ -127,7 +127,10 @@ async fn page_into_db(cli: &reqwest::Client, conn: &diesel::PgConnection, page_n
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    dotenv::dotenv().unwrap();
+    let dotenv_res = dotenv::dotenv();
+    if let Err(e) = dotenv_res {
+        eprintln!("WARN: Failed to load .env: {:?}", e);
+    }
     // let password = std::env::var("MW_PASSWORD").expect("Missing MW_PASSWORD");
     let pg_url = std::env::var("DATABASE_URL").expect("Missing DATABASE_URL");
     let conn = diesel::PgConnection::establish(&pg_url).unwrap();
