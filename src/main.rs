@@ -1,4 +1,3 @@
-#![feature(type_ascription)]
 #[macro_use] extern crate diesel;
 
 use std::convert::TryInto;
@@ -119,7 +118,8 @@ async fn page_into_db(cli: &reqwest::Client, conn: &diesel::PgConnection, page_n
             diesel::insert_into(posts::table).values(&ins).execute(conn)?;
         }
         maybe_page = Some(page);
-        Ok(()):Result<(),Box<dyn std::error::Error>>
+        let res:Result<(),Box<dyn std::error::Error>> = Ok(());
+        res
     }).unwrap();
     //maybe_page.unwrap()
     pageinfo
@@ -162,7 +162,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     use schema::pages::dsl as p_dsl;
     let last_page = || {
-        p_dsl::pages.select(Page::cols()).filter(p_dsl::valid).order(p_dsl::page_num.desc()).limit(1).get_result(&conn).optional().unwrap():Option<Page>
+        let x:Option<Page> = p_dsl::pages.select(Page::cols()).filter(p_dsl::valid).order(p_dsl::page_num.desc()).limit(1).get_result(&conn).optional().unwrap();
+        x
     };
     let mut next_page = last_page().map(|p| p.page_num).unwrap_or(1);
     loop {
@@ -171,7 +172,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         next_page += 1;
     }
 
-    eprintln!("We should have all those pages now. {} in total", p_dsl::pages.filter(p_dsl::valid).count().get_result(&conn).unwrap():i64);
+    let pages:i64 = p_dsl::pages.filter(p_dsl::valid).count().get_result(&conn).unwrap();
+    eprintln!("We should have all those pages now. {} in total", pages);
 
     use valid_posts::dsl as o_dsl;
     let posts:Vec<Post> = o_dsl::valid_posts
@@ -204,11 +206,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         ));
         name_to_id.entry(post.username.clone()).or_insert(userid);
         standing.name = post.username.clone();
-        standing.accrued_time += (last_time - post.posted_at).num_seconds().try_into().unwrap():i32;
+        let x:i32 = (last_time - post.posted_at).num_seconds().try_into().unwrap();
+        standing.accrued_time += x;
         standing.post_count += 1;
         last_time = post.posted_at;
     }
-    diesel::insert_into(schema::standings::table).values(standings.values().map(|a| &a.0).collect():Vec<_>).execute(&conn).unwrap();
+    let x:Vec<_> = standings.values().map(|a| &a.0).collect();
+    diesel::insert_into(schema::standings::table).values(x).execute(&conn).unwrap();
     diesel::update(schema::standings_sets::table).filter(standings_sets::dsl::rowid.eq(set_rowid)).set(standings_sets::dsl::finished_at.eq(Utc::now())).execute(&conn).unwrap();
 
     let set_rowid:i32 = diesel::insert_into(standings_sets::table).values(standings_sets::dsl::ty.eq("System")).returning(schema::standings_sets::dsl::rowid).get_result(&conn).unwrap();
@@ -217,7 +221,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         ( "Snow", "jean-luc" ),
         ( "HenHenry", "jean-luc" ),
     ].iter().cloned().collect();
-    let ids = standings.keys().map(|k| *k).collect():Vec<_>;
+    let ids:Vec<_> = standings.keys().map(|k| *k).collect();
     for id in ids {
         let master;
         let sub_standing;
@@ -239,7 +243,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
     }
-    diesel::insert_into(standings::table).values(standings.values().map(|a| &a.0).collect():Vec<_>).execute(&conn).unwrap();
+    let x:Vec<_> = standings.values().map(|a| &a.0).collect();
+    diesel::insert_into(standings::table).values(x).execute(&conn).unwrap();
     diesel::update(standings_sets::table).filter(standings_sets::dsl::rowid.eq(set_rowid)).set(standings_sets::dsl::finished_at.eq(Utc::now())).execute(&conn).unwrap();
 
     generate::generate();
