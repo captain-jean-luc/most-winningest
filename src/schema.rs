@@ -1,4 +1,6 @@
-table! {
+// @generated automatically by Diesel CLI.
+
+diesel::table! {
     pages (rowid) {
         rowid -> Int4,
         page_num -> Int4,
@@ -10,7 +12,7 @@ table! {
     }
 }
 
-table! {
+diesel::table! {
     posts (rowid) {
         rowid -> Int4,
         pages_rowid -> Nullable<Int4>,
@@ -18,13 +20,13 @@ table! {
         username -> Text,
         userid -> Nullable<Int4>,
         posted_at -> Timestamptz,
-        linked_accounts -> Array<Text>,
+        linked_accounts -> Array<Nullable<Text>>,
         master_account -> Nullable<Text>,
         injected -> Bool,
     }
 }
 
-table! {
+diesel::table! {
     standings (rowid) {
         rowid -> Int4,
         set_rowid -> Int4,
@@ -35,7 +37,7 @@ table! {
     }
 }
 
-table! {
+diesel::table! {
     standings_sets (rowid) {
         rowid -> Int4,
         ty -> Text,
@@ -43,10 +45,10 @@ table! {
     }
 }
 
-joinable!(posts -> pages (pages_rowid));
-joinable!(standings -> standings_sets (set_rowid));
+diesel::joinable!(posts -> pages (pages_rowid));
+diesel::joinable!(standings -> standings_sets (set_rowid));
 
-allow_tables_to_appear_in_same_query!(
+diesel::allow_tables_to_appear_in_same_query!(
     pages,
     posts,
     standings,
