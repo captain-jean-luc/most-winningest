@@ -121,7 +121,7 @@ impl From<Node<'_>> for Post {
 
         let comment_wrap_el = n.find(Attr("data-quotedata",())).next().unwrap();
         let qd:QuoteData = serde_json::from_str(comment_wrap_el.attr("data-quotedata").unwrap()).unwrap();
-        let posted_at = Utc.timestamp(qd.timestamp,0);
+        let posted_at = Utc.timestamp_opt(qd.timestamp,0).single().unwrap();
 
         Post{
             id,

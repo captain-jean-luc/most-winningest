@@ -14,6 +14,6 @@
 
   src = ./.;
 
-  cargoHash = "sha256-5Wbx/RBqtDmJUKdLXttryMuJfpkUJwRGTFYP3UFEPT0=";
+  cargoHash = "sha256-lYIUYRsgANjba+VlBgTOWMN7AyXBRkGlmdK51qxJ7as=";
 }
 

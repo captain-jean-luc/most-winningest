@@ -127,7 +127,7 @@ async fn page_into_db(cli: &reqwest::Client, conn: &diesel::PgConnection, page_n
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let dotenv_res = dotenv::dotenv();
+    let dotenv_res = dotenvy::dotenv();
     if let Err(e) = dotenv_res {
         eprintln!("WARN: Failed to load .env: {:?}", e);
     }
