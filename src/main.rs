@@ -68,13 +68,13 @@ impl Post {
 
 async fn page_into_db(cli: &reqwest::Client, conn: &diesel::PgConnection, page_num:i32) -> parser::Page {
     eprintln!("grabbing {}", page_num);
-    let url;
-    if page_num == 1 {
-        url = "https://community.tulpa.info/topic/7356-game-last-one-to-post-wins/".to_owned();
+    let url = if page_num == 1 {
+        "https://community.tulpa.info/topic/7356-game-last-one-to-post-wins/".to_owned()
     } else {
-        url = format!("https://community.tulpa.info/topic/7356-game-last-one-to-post-wins/page/{}/", page_num);
-    }
+        format!("https://community.tulpa.info/topic/7356-game-last-one-to-post-wins/page/{}/", page_num)
+    };
     let content = cli.get(&url).send().await.unwrap().text().await.unwrap();
+    dbg!(content.as_str());
     let pageinfo = parser::Page::from(select::document::Document::from(content.as_str()));
     let ins = PageIns {
         page_num: pageinfo.page_current.get().try_into().unwrap(),
@@ -224,22 +224,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         ( "Snow", "jean-luc" ),
         ( "HenHenry", "jean-luc" ),
     ].iter().cloned().collect();
-    let ids:Vec<_> = standings.keys().map(|k| *k).collect();
+    let ids:Vec<_> = standings.keys().copied().collect();
     for id in ids {
         let master;
         let sub_standing;
         {
             let (ref mut sub_standing_ref, ref master_ref) = standings.get_mut(&id).unwrap();
-            // if &sub_standing_ref.name == "Snow" {
-            //     dbg!(&sub_standing_ref, &master_ref);
-            // }
             sub_standing_ref.set_rowid = set_rowid;
             master = master_ref.as_ref().map(|s| s.to_owned()).or(manual_fixings.get(sub_standing_ref.name.as_str()).map(|s| (*s).to_string()));
             sub_standing = sub_standing_ref.clone();
         }
         if let Some(name) = master {
             if let Some(otherid) = name_to_id.get(&name) {
-                let (ref mut master_standing, _) = standings.get_mut(&otherid).unwrap();
+                let (ref mut master_standing, _) = standings.get_mut(otherid).unwrap();
                 master_standing.accrued_time += sub_standing.accrued_time;
                 master_standing.post_count += sub_standing.post_count;
                 standings.remove(&id);

@@ -39,7 +39,6 @@ impl Standing {
 }
 
 type DBPool = r2d2::Pool<r2d2::ConnectionManager<diesel::pg::PgConnection>>;
-// type ArcPool = Arc<DBPool>;
 
 fn divmod(a: i32, b: i32) -> (i32, i32) {
     (a/b, a%b)
@@ -91,60 +90,32 @@ pub fn generate() {
         .order(standings_sets::dsl::finished_at.desc())
         .select((standings_sets::dsl::rowid, standings_sets::dsl::finished_at))
         .get_result(&conn).unwrap();
-    let (syste_set_rowid, syste_upd):(i32,Option<DateTime<Utc>>) = 
-        standings_sets::table
-        .filter(standings_sets::dsl::ty.eq("System"    ).and(standings_sets::dsl::finished_at.is_not_null()))
-        .order(standings_sets::dsl::finished_at.desc())
-        .select((standings_sets::dsl::rowid, standings_sets::dsl::finished_at))
-        .get_result(&conn).unwrap();
     let indiv_standings:Vec<Standing> = standings::table
         .select(Standing::cols())
         .filter(standings::dsl::set_rowid.eq(indiv_set_rowid))
         .order((standings::dsl::is_anon, standings::dsl::accrued_time.desc()))
         .get_results(&conn).unwrap();
-    let syste_standings:Vec<Standing> = standings::table
-        .select(Standing::cols())
-        .filter(standings::dsl::set_rowid.eq(syste_set_rowid))
-        .order((standings::dsl::is_anon, standings::dsl::accrued_time.desc()))
-        .get_results(&conn).unwrap();
-    let last_updated = std::cmp::min(indiv_upd.unwrap(),syste_upd.unwrap());
+    let last_updated = indiv_upd.unwrap();
     let markup = html! {
         (DOCTYPE)
         html {
             head {
                 (PreEscaped(r#"<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">"#))
                 style {
-                    "
-                    .name { display: inline-block; }
-                    /*.indiv { display: none }
-                    #show_indiv:checked ~ table .syste { display: none }
-                    #show_indiv:checked ~ table .indiv { display: table-row }*/"
+                    ".name { display: inline-block; }"
                 }
                 title { "LOTPW Stats" }
             }
             body {
                 .container {
                     h1 { "LOTPW Stats" }
-                    p {
-                        "Update 2021-10-24: It's back, now more <infinitive> than ever! Posts from the April 14th outage should be included. All the info was taken from "
-                        a href="https://community.tulpa.info/topic/7356-game-last-one-to-post-wins/page/6595/?tab=comments#comment-296381" { "Pleeb's post" }
-                        " and manually imported. No free 10 hours for Felicity."
-                    }
                     p { 
                         r#"Any time that Anonymous/Guest posters have accrued is at the bottom. Updated every once in awhile, hopefully. Last updated "#
                         ( last_updated.to_rfc3339_opts(chrono::SecondsFormat::Secs, true) )
                         "."
                     }
+                    p { "Has more than a few days passed since it last updated? That means something broke, please let me know." }
                     hr/
-                    // p {
-                    //     "2020-08-07: This has now been updated to support the new forum software, however the new forum does not show linked accounts, so all scores are now individual scores."
-                    // }
-                    // hr/
-                    // input#show_indiv type="checkbox" checked? disabled?{}
-                    // label for="show_indiv" {
-                    //     ( maud::PreEscaped("&nbsp;") )
-                    //     "Show individual scores"
-                    // }
                     table.table.table-striped.table-bordered.table-hover.table-sm {
                         thead {
                             tr {
@@ -155,18 +126,6 @@ pub fn generate() {
                             }
                         }
                         tbody {
-                            @if false {
-                                @let mut count = 1;
-                                @for standing in &syste_standings {
-                                    ( display_standing(standing, false, count) )
-                                    @if !standing.is_anon {
-                                        ( { count += 1; ""} )
-                                    }
-                                }
-                                @if syste_standings.len() % 2 == 1 {
-                                    tr style="display:none" {}
-                                }
-                            }
                             @let mut count = 1;
                             @for standing in &indiv_standings {
                                 ( display_standing(standing, true, count) )
@@ -175,6 +134,11 @@ pub fn generate() {
                                 }
                             }
                         }
+                    }
+                    p {
+                        "Note: Posts from the April 14th outage should be included. All the info was taken from "
+                        a href="https://community.tulpa.info/topic/7356-game-last-one-to-post-wins/page/6595/?tab=comments#comment-296381" { "Pleeb's post" }
+                        " and manually imported. No free 10 hours for Felicity."
                     }
                     small {
                         "Made by Jean-luc"
