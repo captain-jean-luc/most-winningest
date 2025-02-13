@@ -184,7 +184,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // }
     let set_rowid:i32 = diesel::insert_into(standings_sets::table).values(standings_sets::dsl::ty.eq("Individual")).returning(schema::standings_sets::dsl::rowid).get_result(&mut conn).unwrap();
     #[derive(Debug, Clone, Insertable)]
-    #[table_name="standings"]
+    #[diesel(table_name = standings)]
     struct Standing {
         set_rowid: i32,
         name: String,
