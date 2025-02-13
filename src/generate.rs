@@ -83,18 +83,18 @@ pub fn generate() {
         }
     }
 
-    let conn = pool.get().unwrap();
+    let mut conn = pool.get().unwrap();
     let (indiv_set_rowid, indiv_upd):(i32,Option<DateTime<Utc>>) = 
         standings_sets::table
         .filter(standings_sets::dsl::ty.eq("Individual").and(standings_sets::dsl::finished_at.is_not_null()))
         .order(standings_sets::dsl::finished_at.desc())
         .select((standings_sets::dsl::rowid, standings_sets::dsl::finished_at))
-        .get_result(&conn).unwrap();
+        .get_result(&mut conn).unwrap();
     let indiv_standings:Vec<Standing> = standings::table
         .select(Standing::cols())
         .filter(standings::dsl::set_rowid.eq(indiv_set_rowid))
         .order((standings::dsl::is_anon, standings::dsl::accrued_time.desc()))
-        .get_results(&conn).unwrap();
+        .get_results(&mut conn).unwrap();
     let last_updated = indiv_upd.unwrap();
     let markup = html! {
         (DOCTYPE)

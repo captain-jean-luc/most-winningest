@@ -1,5 +1,3 @@
-#[macro_use] extern crate diesel;
-
 use std::convert::TryInto;
 use std::collections::HashMap;
 use diesel::prelude::*;
@@ -11,12 +9,12 @@ mod manual_schema;
 mod generate;
 
 use schema::{pages, posts, standings_sets, standings};
-use manual_schema::{valid_posts};
+use manual_schema::valid_posts;
 
 type DT = chrono::DateTime<Utc>;
 
 #[derive(Debug, Insertable)]
-#[table_name="pages"]
+#[diesel(table_name = pages)]
 struct PageIns<'a> {
     page_num:i32,
     body:&'a str,
@@ -37,7 +35,7 @@ impl Page {
 }
 
 #[derive(Debug, Insertable)]
-#[table_name="posts"]
+#[diesel(table_name = posts)]
 struct PostIns<'a> {
     pages_rowid:i32,
     post_num:i32,
@@ -57,16 +55,12 @@ struct Post {
 }
 
 impl Post {
-    // fn cols() -> (posts::username, posts::userid, posts::posted_at, posts::master_account) {
-    //     (posts::username, posts::userid, posts::posted_at, posts::master_account)
-    // }
-
     fn view_cols() -> (valid_posts::username, valid_posts::userid, valid_posts::posted_at, valid_posts::master_account) {
         (valid_posts::username, valid_posts::userid, valid_posts::posted_at, valid_posts::master_account)
     }
 }
 
-async fn page_into_db(cli: &reqwest::Client, conn: &diesel::PgConnection, page_num:i32) -> parser::Page {
+async fn page_into_db(cli: &reqwest::Client, conn: &mut diesel::PgConnection, page_num:i32) -> parser::Page {
     eprintln!("grabbing {}", page_num);
     let url = if page_num == 1 {
         "https://community.tulpa.info/topic/7356-game-last-one-to-post-wins/".to_owned()
@@ -86,7 +80,7 @@ async fn page_into_db(cli: &reqwest::Client, conn: &diesel::PgConnection, page_n
     };
 
     let mut maybe_page = None;
-    conn.transaction(|| {
+    conn.transaction(|conn| {
         diesel::update(pages::table).filter(pages::dsl::page_num.eq(ins.page_num)).set((
             pages::dsl::valid.eq(false),
             pages::dsl::valid_html.eq(false),
@@ -101,7 +95,7 @@ async fn page_into_db(cli: &reqwest::Client, conn: &diesel::PgConnection, page_n
                     userid = None;
                 },
                 parser::User::Known{id, name} => {
-                    username = &name;
+                    username = name;
                     userid = Some(id);
                 }
             }
@@ -133,7 +127,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     // let password = std::env::var("MW_PASSWORD").expect("Missing MW_PASSWORD");
     let pg_url = std::env::var("DATABASE_URL").expect("Missing DATABASE_URL");
-    let conn = diesel::PgConnection::establish(&pg_url).unwrap();
+    let mut conn = diesel::PgConnection::establish(&pg_url).unwrap();
     
     let cli = reqwest::ClientBuilder::new()
         .cookie_store(true)
@@ -165,30 +159,30 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     use schema::pages::dsl as p_dsl;
     let last_page = || {
-        let x:Option<Page> = p_dsl::pages.select(Page::cols()).filter(p_dsl::valid).order(p_dsl::page_num.desc()).limit(1).get_result(&conn).optional().unwrap();
+        let x:Option<Page> = p_dsl::pages.select(Page::cols()).filter(p_dsl::valid).order(p_dsl::page_num.desc()).limit(1).get_result(&mut conn).optional().unwrap();
         x
     };
     let mut next_page = last_page().map(|p| p.page_num).unwrap_or(1);
     loop {
-        let new_page = page_into_db(&cli, &conn, next_page).await;
+        let new_page = page_into_db(&cli, &mut conn, next_page).await;
         if new_page.is_last_page() { break }
         next_page += 1;
     }
 
-    let pages:i64 = p_dsl::pages.filter(p_dsl::valid).count().get_result(&conn).unwrap();
+    let pages:i64 = p_dsl::pages.filter(p_dsl::valid).count().get_result(&mut conn).unwrap();
     eprintln!("We should have all those pages now. {} in total", pages);
 
     use valid_posts::dsl as o_dsl;
     let posts:Vec<Post> = o_dsl::valid_posts
         .select(Post::view_cols())
         .order(o_dsl::posted_at.desc())
-        .get_results(&conn)
+        .get_results(&mut conn)
         .unwrap();
     // let name_to_id = HashMap::<String, i32>::new()
     // for post in &posts {
 
     // }
-    let set_rowid:i32 = diesel::insert_into(standings_sets::table).values(standings_sets::dsl::ty.eq("Individual")).returning(schema::standings_sets::dsl::rowid).get_result(&conn).unwrap();
+    let set_rowid:i32 = diesel::insert_into(standings_sets::table).values(standings_sets::dsl::ty.eq("Individual")).returning(schema::standings_sets::dsl::rowid).get_result(&mut conn).unwrap();
     #[derive(Debug, Clone, Insertable)]
     #[table_name="standings"]
     struct Standing {
@@ -215,10 +209,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         last_time = post.posted_at;
     }
     let x:Vec<_> = standings.values().map(|a| &a.0).collect();
-    diesel::insert_into(schema::standings::table).values(x).execute(&conn).unwrap();
-    diesel::update(schema::standings_sets::table).filter(standings_sets::dsl::rowid.eq(set_rowid)).set(standings_sets::dsl::finished_at.eq(Utc::now())).execute(&conn).unwrap();
+    diesel::insert_into(schema::standings::table).values(x).execute(&mut conn).unwrap();
+    diesel::update(schema::standings_sets::table).filter(standings_sets::dsl::rowid.eq(set_rowid)).set(standings_sets::dsl::finished_at.eq(Utc::now())).execute(&mut conn).unwrap();
 
-    let set_rowid:i32 = diesel::insert_into(standings_sets::table).values(standings_sets::dsl::ty.eq("System")).returning(schema::standings_sets::dsl::rowid).get_result(&conn).unwrap();
+    let set_rowid:i32 = diesel::insert_into(standings_sets::table).values(standings_sets::dsl::ty.eq("System")).returning(schema::standings_sets::dsl::rowid).get_result(&mut conn).unwrap();
 
     let manual_fixings:HashMap<&'static str, &'static str> = [
         ( "Snow", "jean-luc" ),
@@ -244,8 +238,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
     let x:Vec<_> = standings.values().map(|a| &a.0).collect();
-    diesel::insert_into(standings::table).values(x).execute(&conn).unwrap();
-    diesel::update(standings_sets::table).filter(standings_sets::dsl::rowid.eq(set_rowid)).set(standings_sets::dsl::finished_at.eq(Utc::now())).execute(&conn).unwrap();
+    diesel::insert_into(standings::table).values(x).execute(&mut conn).unwrap();
+    diesel::update(standings_sets::table).filter(standings_sets::dsl::rowid.eq(set_rowid)).set(standings_sets::dsl::finished_at.eq(Utc::now())).execute(&mut conn).unwrap();
 
     generate::generate();
 

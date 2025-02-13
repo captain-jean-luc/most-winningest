@@ -1,10 +1,9 @@
 {
   rustPlatform,
-  fetchFromGitHub,
   pkg-config,
   openssl,
   postgresql,
-}: rustPlatform.buildRustPackage rec {
+}: rustPlatform.buildRustPackage {
   pname = "most-winningest";
   version = "69.420";
 
@@ -14,6 +13,7 @@
 
   src = ./.;
 
-  cargoHash = "sha256-lYIUYRsgANjba+VlBgTOWMN7AyXBRkGlmdK51qxJ7as=";
+  useFetchCargoVendor = true;
+  cargoHash = "";
 }
 

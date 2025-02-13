@@ -1,4 +1,4 @@
-table! {
+diesel::table! {
     valid_posts (rowid) {
         rowid -> Int4,
         pages_rowid -> Nullable<Int4>,
