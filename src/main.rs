@@ -60,6 +60,29 @@ impl Post {
     }
 }
 
+const KNOWN_SYSTEMS: &[(&str, &[&str])] = &[
+    ("jean-luc", &[
+        "Snow",
+        "HenHenry",
+    ]),
+    ("Luminesce", &[
+        "Reisen",
+        "Tewi",
+        "Flandre",
+        "Lucilyn",
+    ]),
+];
+
+fn make_user_to_system() -> HashMap<&'static str, &'static str> {
+    let mut res = HashMap::new();
+    for (system_name, members) in KNOWN_SYSTEMS {
+        for member_name in *members {
+            res.insert(*member_name, *system_name);
+        }
+    }
+    res
+}
+
 async fn page_into_db(cli: &reqwest::Client, conn: &mut diesel::PgConnection, page_num:i32) -> parser::Page {
     eprintln!("grabbing {}", page_num);
     let url = if page_num == 1 {
@@ -125,52 +148,34 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     if let Err(e) = dotenv_res {
         eprintln!("WARN: Failed to load .env: {:?}", e);
     }
-    // let password = std::env::var("MW_PASSWORD").expect("Missing MW_PASSWORD");
     let pg_url = std::env::var("DATABASE_URL").expect("Missing DATABASE_URL");
+    let skip_download = std::env::var("SKIP_DOWNLOAD").unwrap_or_default() == "1";
     let mut conn = diesel::PgConnection::establish(&pg_url).unwrap();
     
-    let cli = reqwest::ClientBuilder::new()
-        .cookie_store(true)
-        .gzip(true)
-        .referer(false)
-        .user_agent("LOTPW stats.jean-luc.org scraper bot by jean-luc")
-        .timeout(core::time::Duration::from_secs(30))
-        .build()?;
+    if !skip_download {
+        let cli = reqwest::ClientBuilder::new()
+            .cookie_store(true)
+            .gzip(true)
+            .referer(false)
+            .user_agent("LOTPW stats.jean-luc.org scraper bot by jean-luc")
+            .timeout(core::time::Duration::from_secs(30))
+            .build()?;
 
-    // let login_get_url = "https://community.tulpa.info/member.php?action=login";
-    // let login_get_resp = cli.get(login_get_url).send().await.unwrap();
-    // dbg!(login_get_resp.status());
-    // let document = Document::from(login_get_resp.text().await.unwrap().as_str());
-    // let login_form = document.find(Name("form").and(Attr("action","member.php"))).next().unwrap();
-    // //get fields action, url, and my_post_key
-    // let mut fields = login_form.find(Name("input").and(Attr("type","hidden")))
-    //     .map(|node| (node.attr("name").unwrap_or(""), node.attr("value").unwrap_or("")))
-    //     .collect::<Vec<_>>();
-    // fields.push(("username","jean-luc-bot"));
-    // fields.push(("password",&password));
-    // fields.push(("remember","yes"));
-    // fields.push(("submit","Login"));
+        use schema::pages::dsl as p_dsl;
+        let mut last_page = || {
+            let x:Option<Page> = p_dsl::pages.select(Page::cols()).filter(p_dsl::valid).order(p_dsl::page_num.desc()).limit(1).get_result(&mut conn).optional().unwrap();
+            x
+        };
+        let mut next_page = last_page().map(|p| p.page_num).unwrap_or(1);
+        loop {
+            let new_page = page_into_db(&cli, &mut conn, next_page).await;
+            if new_page.is_last_page() { break }
+            next_page += 1;
+        }
 
-    // let login_post = cli.post("https://community.tulpa.info/member.php").form(&fields).send().await?;
-    // assert!(login_post.status().is_success());
-    
-    // //we don't actually care about the content, but we do want to wait for .info to finish sending the response
-    // let _ = login_post.bytes().await;
-
-    use schema::pages::dsl as p_dsl;
-    let last_page = || {
-        let x:Option<Page> = p_dsl::pages.select(Page::cols()).filter(p_dsl::valid).order(p_dsl::page_num.desc()).limit(1).get_result(&mut conn).optional().unwrap();
-        x
-    };
-    let mut next_page = last_page().map(|p| p.page_num).unwrap_or(1);
-    loop {
-        let new_page = page_into_db(&cli, &mut conn, next_page).await;
-        if new_page.is_last_page() { break }
-        next_page += 1;
+        let pages:i64 = p_dsl::pages.filter(p_dsl::valid).count().get_result(&mut conn).unwrap();
+        eprintln!("We should have all those pages now. {} in total", pages);
     }
-
-    let pages:i64 = p_dsl::pages.filter(p_dsl::valid).count().get_result(&mut conn).unwrap();
-    eprintln!("We should have all those pages now. {} in total", pages);
 
     use valid_posts::dsl as o_dsl;
     let posts:Vec<Post> = o_dsl::valid_posts
@@ -178,10 +183,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .order(o_dsl::posted_at.desc())
         .get_results(&mut conn)
         .unwrap();
-    // let name_to_id = HashMap::<String, i32>::new()
-    // for post in &posts {
-
-    // }
     let set_rowid:i32 = diesel::insert_into(standings_sets::table).values(standings_sets::dsl::ty.eq("Individual")).returning(schema::standings_sets::dsl::rowid).get_result(&mut conn).unwrap();
     #[derive(Debug, Clone, Insertable)]
     #[diesel(table_name = standings)]
@@ -197,7 +198,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut last_time = Utc::now();
     for post in &posts {
         let userid = post.userid.unwrap_or(0);
-        let (ref mut standing, _) = standings.entry(userid).or_insert((
+        let &mut (ref mut standing, _) = standings.entry(userid).or_insert((
             Standing{set_rowid, name: post.username.clone(), accrued_time: 0, post_count: 0, is_anon: post.userid.is_none()},
             post.master.clone(),
         ));
@@ -214,23 +215,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let set_rowid:i32 = diesel::insert_into(standings_sets::table).values(standings_sets::dsl::ty.eq("System")).returning(schema::standings_sets::dsl::rowid).get_result(&mut conn).unwrap();
 
-    let manual_fixings:HashMap<&'static str, &'static str> = [
-        ( "Snow", "jean-luc" ),
-        ( "HenHenry", "jean-luc" ),
-    ].iter().cloned().collect();
+    let user_to_system = make_user_to_system();
     let ids:Vec<_> = standings.keys().copied().collect();
     for id in ids {
         let master;
         let sub_standing;
         {
-            let (ref mut sub_standing_ref, ref master_ref) = standings.get_mut(&id).unwrap();
+            let &mut (ref mut sub_standing_ref, ref master_ref) = standings.get_mut(&id).unwrap();
             sub_standing_ref.set_rowid = set_rowid;
-            master = master_ref.as_ref().map(|s| s.to_owned()).or(manual_fixings.get(sub_standing_ref.name.as_str()).map(|s| (*s).to_string()));
+            master = master_ref.as_ref().map(|s| s.to_owned()).or(user_to_system.get(sub_standing_ref.name.as_str()).map(|s| (*s).to_string()));
             sub_standing = sub_standing_ref.clone();
         }
         if let Some(name) = master {
             if let Some(otherid) = name_to_id.get(&name) {
-                let (ref mut master_standing, _) = standings.get_mut(otherid).unwrap();
+                let &mut (ref mut master_standing, _) = standings.get_mut(otherid).unwrap();
                 master_standing.accrued_time += sub_standing.accrued_time;
                 master_standing.post_count += sub_standing.post_count;
                 standings.remove(&id);

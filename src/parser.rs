@@ -11,6 +11,7 @@ use std::num::NonZeroU32;
 pub struct Page {
     pub page_count: NonZeroU32,
     pub page_current: NonZeroU32,
+    #[allow(dead_code)]
     pub pages: Vec<NonZeroU32>,
     pub posts: Vec<Post>,
 }
@@ -23,7 +24,7 @@ impl Page {
 
 fn strip_begin_expecting<'a>(thing: &'a str, expect:&'a str) -> &'a str {
     if thing.starts_with( expect ) {
-        return thing.split_at(expect.len()).1
+        thing.split_at(expect.len()).1
     }else{
         panic!("Expecting {:?} at beginning of {:?}", expect, thing);
     }
@@ -63,6 +64,7 @@ pub enum User {
 
 #[derive(Debug, Clone)]
 pub struct Post {
+    #[allow(dead_code)]
     pub id:u32,
     pub num:Option<u32>,
     pub user:User,

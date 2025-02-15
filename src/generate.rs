@@ -90,9 +90,20 @@ pub fn generate() {
         .order(standings_sets::dsl::finished_at.desc())
         .select((standings_sets::dsl::rowid, standings_sets::dsl::finished_at))
         .get_result(&mut conn).unwrap();
+    let system_set_rowid:i32 = 
+        standings_sets::table
+        .filter(standings_sets::dsl::ty.eq("System").and(standings_sets::dsl::finished_at.is_not_null()))
+        .order(standings_sets::dsl::finished_at.desc())
+        .select(standings_sets::dsl::rowid)
+        .get_result(&mut conn).unwrap();
     let indiv_standings:Vec<Standing> = standings::table
         .select(Standing::cols())
         .filter(standings::dsl::set_rowid.eq(indiv_set_rowid))
+        .order((standings::dsl::is_anon, standings::dsl::accrued_time.desc()))
+        .get_results(&mut conn).unwrap();
+    let system_standings:Vec<Standing> = standings::table
+        .select(Standing::cols())
+        .filter(standings::dsl::set_rowid.eq(system_set_rowid))
         .order((standings::dsl::is_anon, standings::dsl::accrued_time.desc()))
         .get_results(&mut conn).unwrap();
     let last_updated = indiv_upd.unwrap();
@@ -101,36 +112,85 @@ pub fn generate() {
         html {
             head {
                 (PreEscaped(r#"<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">"#))
-                style {
-                    ".name { display: inline-block; }"
-                }
+                style { r#"
+                    .name { display: inline-block; }
+                    #select-leaderboard-group {
+                        margin-bottom: 1rem;
+                    }
+                    #select-leaderboard-group label {
+                        display: block;
+                        padding: 4px 8px;
+                        border: 1px solid grey;
+                        border-radius: 3px;
+                        margin: 4px 0;
+                        width: fit-content;
+                    }
+                    #select-leaderboard-group input {
+                        margin-right: 5px;
+                    }
+                    
+
+                    #individual-standings {
+                        display: none;
+                    }
+                    #select-leaderboard-group:has(#ty-individual:checked) ~ #individual-standings {
+                        display: table;
+                    }
+                    #select-leaderboard-group:has(#ty-individual:checked) ~ #system-standings {
+                        display: none;
+                    }
+                "#}
                 title { "LOTPW Stats" }
             }
             body {
                 .container {
                     h1 { "LOTPW Stats" }
                     p { 
-                        r#"Any time that Anonymous/Guest posters have accrued is at the bottom. Updated every once in awhile, hopefully. Last updated "#
+                        r#"Any time that Anonymous/Guest posters have accrued is at the bottom. Updated every hour. Last updated "#
                         ( last_updated.to_rfc3339_opts(chrono::SecondsFormat::Secs, true) )
                         "."
                     }
+                    p { "Who is in which system is information I have to add manually. Please DM me on the forums if you want yours added!" }
                     p { "Has more than a few days passed since it last updated? That means something broke, please let me know." }
-                    hr/
-                    table.table.table-striped.table-bordered.table-hover.table-sm {
-                        thead {
-                            tr {
-                                th { "Rank" }
-                                th { "Name" }
-                                th style="min-width:8.3em" { "Time" }
-                                th { "Posts" }
+                    hr;
+                    #select-leaderboard-group {
+                        label {
+                            
+                            input #ty-system type="radio" name="ty" value="system" checked;
+                            "System Leaderboard"
+                        }
+                        label {
+                            input #ty-individual type="radio" name="ty" value="individual";
+                            "Individual Leaderboard"
+                        }
+                    }
+                    @for (list, is_indiv) in [ (system_standings, false), (indiv_standings, true) ] {
+                        table.table.table-striped.table-bordered.table-hover.table-sm id=(if is_indiv { "individual-standings" } else { "system-standings" }) {
+                            thead {
+                                tr {
+                                    th { "Rank" }
+                                    th { "Name" }
+                                    th style="min-width:8.3em" { "Time" }
+                                    th { "Posts" }
+                                }
+                            }
+                            tbody {
+                                @let mut count = 1;
+                                @for standing in &list {
+                                    ( display_standing(standing, is_indiv, count) )
+                                    @if !standing.is_anon {
+                                        ( { count += 1; ""} )
+                                    }
+                                }
                             }
                         }
-                        tbody {
-                            @let mut count = 1;
-                            @for standing in &indiv_standings {
-                                ( display_standing(standing, true, count) )
-                                @if !standing.is_anon {
-                                    ( { count += 1; ""} )
+                    }
+                    @for (system_name, members) in crate::KNOWN_SYSTEMS {
+                        p.system-info {
+                            r#"Members of ""# (system_name) r#"":"#
+                            ul {
+                                @for member_name in *members {
+                                    li { (member_name) }
                                 }
                             }
                         }
@@ -142,6 +202,8 @@ pub fn generate() {
                     }
                     small {
                         "Made by Jean-luc"
+                        " | "
+                        a href="https://github.com/captain-jean-luc/most-winningest" { "Source" }
                     }
                 }
             }
