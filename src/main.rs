@@ -71,6 +71,44 @@ const KNOWN_SYSTEMS: &[(&str, &[&str])] = &[
         "Flandre",
         "Lucilyn",
     ]),
+    ("Breloomancer", &[
+        "Thelmign",
+    ]),
+    ("TB", &[
+        "Byakko",
+        "Rena Bonnie",
+    ]),
+    ("BearBaeBeau", &[
+        "Autumn Ren",
+        "Ashley",
+        "Joy",
+        "Misha",
+        "Gweneth",
+    ]),
+    ("Felight", &[
+        "Indigo Blue",
+        "Apollo Fire",
+        "Dynamo Lux",
+        "Gelato Sweet",
+        "Piano Soul",
+        "Radio Hiss",
+    ]),
+    ("Ranger", &[
+        "GrayTheCat",
+    ]),
+    ("TurboSimmie", &[
+        "Chloe - September13",
+    ]),
+    ("Yakumo", &[
+        "Ido",
+    ]),
+    ("Linkzelda", &[
+        "| Eva |",
+        "| Ada |",
+    ]),
+    ("Ice909", &[
+        "Janey_is_Better_Than_Pleeb",
+    ]),
 ];
 
 fn make_user_to_system() -> HashMap<&'static str, &'static str> {
