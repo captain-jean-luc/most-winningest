@@ -98,6 +98,8 @@ const KNOWN_SYSTEMS: &[(&str, &[&str])] = &[
     ]),
     ("TurboSimmie", &[
         "Chloe - September13",
+        "September13",
+        "September 13",
     ]),
     ("Yakumo", &[
         "Ido",
