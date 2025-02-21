@@ -73,6 +73,9 @@ pub struct Post {
 
 impl From<Node<'_>> for Post {
     fn from(n: Node<'_>) -> Post {
+        // eprintln!("-v- post -v-");
+        // eprintln!("{}", n.html());
+        // eprintln!("-^- post -^-");
         let name_el = n.find(
             Descendant(
                 Child(
@@ -93,7 +96,16 @@ impl From<Node<'_>> for Post {
 
         let id = strip_begin_expecting(n.attr("id").unwrap(), "elComment_").parse().unwrap();
 
-        let num = {
+        let num = if let Some(postnumber_span) = n.find(Class("ks_postNumber")).next() {
+            // dbg!(&postnumber_span);
+            let postnumber_unstripped = postnumber_span.text();
+            let postnumber_str = postnumber_unstripped.trim();
+            if postnumber_str.is_empty() {
+                None
+            } else {
+                Some(strip_begin_expecting(postnumber_str, "#").parse().unwrap())
+            }
+        } else {
             let mut a = n.find(Class("ipsComment_tools"));
             let b = a.next().unwrap();
             let c = b.find(Name("li")).last();
