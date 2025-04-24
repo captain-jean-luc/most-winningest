@@ -15,6 +15,6 @@
   src = ./.;
 
   useFetchCargoVendor = true;
-  cargoHash = "sha256-oSb9PDLVZbbkQOtc/9qE+bo24m9Agd2c/4XDRXpjhGw=";
+  cargoLock.lockFile = ./Cargo.lock;
 }
 
