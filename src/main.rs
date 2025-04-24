@@ -111,6 +111,9 @@ const KNOWN_SYSTEMS: &[(&str, &[&str])] = &[
     ("Ice909", &[
         "Janey_is_Better_Than_Pleeb",
     ]),
+    ("Shaula", &[
+        "Nightfall",
+    ]),
 ];
 
 fn make_user_to_system() -> HashMap<&'static str, &'static str> {
