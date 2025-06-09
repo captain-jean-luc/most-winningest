@@ -2,7 +2,7 @@
   rustPlatform,
   pkg-config,
   openssl,
-  postgresql,
+  libpq,
 }: rustPlatform.buildRustPackage {
   pname = "most-winningest";
   version = "69.420";
@@ -10,7 +10,10 @@
 
   nativeBuildInputs = [ pkg-config ];
 
-  buildInputs = [ openssl postgresql ];
+  buildInputs = [
+    openssl
+    libpq
+  ];
 
   src = ./.;
 

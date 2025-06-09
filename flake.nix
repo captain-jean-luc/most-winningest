@@ -9,7 +9,7 @@
   outputs = { self, nixpkgs, flake-utils, fenix }: 
     flake-utils.lib.eachDefaultSystem (system: let
       pkgs = import nixpkgs { inherit system; };
-      toolchain = fenix.packages.${system}.beta.completeToolchain;
+      toolchain = fenix.packages.${system}.stable.completeToolchain;
       rustPlatform = pkgs.makeRustPlatform {
         cargo = toolchain;
         rustc = toolchain;
