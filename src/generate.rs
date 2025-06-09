@@ -139,6 +139,16 @@ pub fn generate() {
                     #select-leaderboard-group:has(#ty-individual:checked) ~ #system-standings {
                         display: none;
                     }
+
+                    .exact-username {
+                        white-space: pre-wrap;
+                        padding: 0.5px 3px;
+                        border-radius: 4px;
+                        margin: 2px 0;
+                        display: inline-block;
+                        background-color: #eee;
+                        font-family: monospace;
+                    }
                 "#}
                 title { "LOTPW Stats" }
             }
@@ -187,10 +197,16 @@ pub fn generate() {
                     }
                     @for (system_name, members) in crate::KNOWN_SYSTEMS {
                         p.system-info {
-                            r#"Members of ""# (system_name) r#"":"#
+                            div {
+                                "Members of "
+                                .exact-username { (system_name) }
+                                ":"
+                            }
                             ul {
                                 @for member_name in *members {
-                                    li { (member_name) }
+                                    li {
+                                        .exact-username { (member_name) }
+                                    }
                                 }
                             }
                         }
