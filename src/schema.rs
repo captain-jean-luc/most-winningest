@@ -48,4 +48,9 @@ diesel::table! {
 diesel::joinable!(posts -> pages (pages_rowid));
 diesel::joinable!(standings -> standings_sets (set_rowid));
 
-diesel::allow_tables_to_appear_in_same_query!(pages, posts, standings, standings_sets,);
+diesel::allow_tables_to_appear_in_same_query!(
+    pages,
+    posts,
+    standings,
+    standings_sets,
+);
