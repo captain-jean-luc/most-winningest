@@ -1,10 +1,10 @@
 use chrono::{DateTime, Utc};
 
-use crate::schema::{standings_sets, standings};
+use crate::schema::{standings, standings_sets};
 
 use diesel::prelude::*;
 use diesel::r2d2;
-use maud::{DOCTYPE,PreEscaped,html};
+use maud::{DOCTYPE, PreEscaped, html};
 use phf::phf_map;
 
 //darn people with long names
@@ -33,19 +33,29 @@ struct Standing {
 }
 
 impl Standing {
-    fn cols() -> (standings::name, standings::accrued_time, standings::post_count, standings::is_anon) {
-        (standings::name, standings::accrued_time, standings::post_count, standings::is_anon)
+    fn cols() -> (
+        standings::name,
+        standings::accrued_time,
+        standings::post_count,
+        standings::is_anon,
+    ) {
+        (
+            standings::name,
+            standings::accrued_time,
+            standings::post_count,
+            standings::is_anon,
+        )
     }
 }
 
 type DBPool = r2d2::Pool<r2d2::ConnectionManager<diesel::pg::PgConnection>>;
 
 fn divmod(a: i32, b: i32) -> (i32, i32) {
-    (a/b, a%b)
+    (a / b, a % b)
 }
 
-fn display_time(accrued_time:i32) -> String {
-    let (hours,minutes) = divmod(accrued_time / 60, 60);
+fn display_time(accrued_time: i32) -> String {
+    let (hours, minutes) = divmod(accrued_time / 60, 60);
     let (days, hours) = divmod(hours, 24);
     let (weeks, days) = divmod(days, 7);
     format!("{}w {}d {:02}h {:02}m", weeks, days, hours, minutes)
@@ -55,10 +65,10 @@ pub fn generate() {
     eprintln!("Generating...");
     let pg_url = std::env::var("DATABASE_URL").expect("Missing DATABASE_URL environment variable.");
     let manager = r2d2::ConnectionManager::new(pg_url.as_str());
-    let pool:DBPool = r2d2::Pool::new(manager).unwrap();
+    let pool: DBPool = r2d2::Pool::new(manager).unwrap();
 
     fn display_standing(s: &Standing, is_indiv: bool, rank: u32) -> maud::Markup {
-        let maybe_replacement_name = NAME_REPLACEMENTS.get( s.name.as_str() );
+        let maybe_replacement_name = NAME_REPLACEMENTS.get(s.name.as_str());
         html! {
             tr.indiv[is_indiv].syste[!is_indiv] {
                 @if s.is_anon {
@@ -75,7 +85,7 @@ pub fn generate() {
                         }
                     }
                 }
-                td align="right" { 
+                td align="right" {
                     .display_time { (display_time(s.accrued_time)) }
                 }
                 td align="right" { (s.post_count) }
@@ -84,28 +94,38 @@ pub fn generate() {
     }
 
     let mut conn = pool.get().unwrap();
-    let (indiv_set_rowid, indiv_upd):(i32,Option<DateTime<Utc>>) = 
-        standings_sets::table
-        .filter(standings_sets::dsl::ty.eq("Individual").and(standings_sets::dsl::finished_at.is_not_null()))
+    let (indiv_set_rowid, indiv_upd): (i32, Option<DateTime<Utc>>) = standings_sets::table
+        .filter(
+            standings_sets::dsl::ty
+                .eq("Individual")
+                .and(standings_sets::dsl::finished_at.is_not_null()),
+        )
         .order(standings_sets::dsl::finished_at.desc())
         .select((standings_sets::dsl::rowid, standings_sets::dsl::finished_at))
-        .get_result(&mut conn).unwrap();
-    let system_set_rowid:i32 = 
-        standings_sets::table
-        .filter(standings_sets::dsl::ty.eq("System").and(standings_sets::dsl::finished_at.is_not_null()))
+        .get_result(&mut conn)
+        .unwrap();
+    let system_set_rowid: i32 = standings_sets::table
+        .filter(
+            standings_sets::dsl::ty
+                .eq("System")
+                .and(standings_sets::dsl::finished_at.is_not_null()),
+        )
         .order(standings_sets::dsl::finished_at.desc())
         .select(standings_sets::dsl::rowid)
-        .get_result(&mut conn).unwrap();
-    let indiv_standings:Vec<Standing> = standings::table
+        .get_result(&mut conn)
+        .unwrap();
+    let indiv_standings: Vec<Standing> = standings::table
         .select(Standing::cols())
         .filter(standings::dsl::set_rowid.eq(indiv_set_rowid))
         .order((standings::dsl::is_anon, standings::dsl::accrued_time.desc()))
-        .get_results(&mut conn).unwrap();
-    let system_standings:Vec<Standing> = standings::table
+        .get_results(&mut conn)
+        .unwrap();
+    let system_standings: Vec<Standing> = standings::table
         .select(Standing::cols())
         .filter(standings::dsl::set_rowid.eq(system_set_rowid))
         .order((standings::dsl::is_anon, standings::dsl::accrued_time.desc()))
-        .get_results(&mut conn).unwrap();
+        .get_results(&mut conn)
+        .unwrap();
     let last_updated = indiv_upd.unwrap();
     let markup = html! {
         (DOCTYPE)
@@ -155,7 +175,7 @@ pub fn generate() {
             body {
                 .container {
                     h1 { "LOTPW Stats" }
-                    p { 
+                    p {
                         r#"Any time that Anonymous/Guest posters have accrued is at the bottom. Updated every hour. Last updated "#
                         ( last_updated.to_rfc3339_opts(chrono::SecondsFormat::Secs, true) )
                         "."
@@ -165,7 +185,7 @@ pub fn generate() {
                     hr;
                     #select-leaderboard-group {
                         label {
-                            
+
                             input #ty-system type="radio" name="ty" value="system" checked;
                             "System Leaderboard"
                         }

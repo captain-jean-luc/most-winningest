@@ -1,8 +1,8 @@
 use chrono::Utc;
 use chrono::offset::TimeZone;
-use select::node::Node;
 use select::document::Document;
-use select::predicate::{Predicate, Class, Name, Attr, Child, Descendant};
+use select::node::Node;
+use select::predicate::{Attr, Child, Class, Descendant, Name, Predicate};
 use serde::Deserialize;
 
 use std::num::NonZeroU32;
@@ -22,10 +22,10 @@ impl Page {
     }
 }
 
-fn strip_begin_expecting<'a>(thing: &'a str, expect:&'a str) -> &'a str {
-    if thing.starts_with( expect ) {
+fn strip_begin_expecting<'a>(thing: &'a str, expect: &'a str) -> &'a str {
+    if thing.starts_with(expect) {
         thing.split_at(expect.len()).1
-    }else{
+    } else {
         panic!("Expecting {:?} at beginning of {:?}", expect, thing);
     }
 }
@@ -34,7 +34,14 @@ impl From<Document> for Page {
     fn from(document: Document) -> Page {
         let pagination_el = document.find(Class("ipsPagination")).next().unwrap();
         let page_count = pagination_el.attr("data-pages").unwrap().parse().unwrap();
-        let page_current = pagination_el.find(Class("ipsPagination_active")).next().unwrap().text().trim().parse().unwrap();
+        let page_current = pagination_el
+            .find(Class("ipsPagination_active"))
+            .next()
+            .unwrap()
+            .text()
+            .trim()
+            .parse()
+            .unwrap();
 
         let mut pages = Vec::new();
         for page_el in pagination_el.find(Class("ipsPagination_page")) {
@@ -44,10 +51,10 @@ impl From<Document> for Page {
         }
 
         let mut posts = Vec::new();
-        for node in document.find(Name("article").and(Class("cPost"))){
+        for node in document.find(Name("article").and(Class("cPost"))) {
             posts.push(Post::from(node));
         }
-        Page{
+        Page {
             page_count,
             page_current,
             pages,
@@ -59,16 +66,16 @@ impl From<Document> for Page {
 #[derive(Debug, Clone)]
 pub enum User {
     Anonymous,
-    Known{id: u64, name: String},
+    Known { id: u64, name: String },
 }
 
 #[derive(Debug, Clone)]
 pub struct Post {
     #[allow(dead_code)]
-    pub id:u32,
-    pub num:Option<u32>,
-    pub user:User,
-    pub posted_at:chrono::DateTime<Utc>,
+    pub id: u32,
+    pub num: Option<u32>,
+    pub user: User,
+    pub posted_at: chrono::DateTime<Utc>,
 }
 
 impl From<Node<'_>> for Post {
@@ -76,25 +83,20 @@ impl From<Node<'_>> for Post {
         // eprintln!("-v- post -v-");
         // eprintln!("{}", n.html());
         // eprintln!("-^- post -^-");
-        let name_el = n.find(
-            Descendant(
+        let name_el = n
+            .find(Descendant(
                 Child(
-                    (
-                        Name("aside")
-                    ).and(
-                        Class("cAuthorPane")
-                    ),
-                    (
-                        Name("h3")
-                    ).and(
-                        Class("cAuthorPane_author")
-                    )
+                    (Name("aside")).and(Class("cAuthorPane")),
+                    (Name("h3")).and(Class("cAuthorPane_author")),
                 ),
-                Name("strong")
-            )
-        ).next().unwrap();
+                Name("strong"),
+            ))
+            .next()
+            .unwrap();
 
-        let id = strip_begin_expecting(n.attr("id").unwrap(), "elComment_").parse().unwrap();
+        let id = strip_begin_expecting(n.attr("id").unwrap(), "elComment_")
+            .parse()
+            .unwrap();
 
         let num = if let Some(postnumber_span) = n.find(Class("ks_postNumber")).next() {
             // dbg!(&postnumber_span);
@@ -121,23 +123,32 @@ impl From<Node<'_>> for Post {
 
         let user;
         if let Some(a) = name_el.find(Name("a")).next() {
-            let id:u64 = strip_begin_expecting(a.attr("href").unwrap(), "https://community.tulpa.info/profile/").split('-').next().unwrap().parse().unwrap();
+            let id: u64 = strip_begin_expecting(
+                a.attr("href").unwrap(),
+                "https://community.tulpa.info/profile/",
+            )
+            .split('-')
+            .next()
+            .unwrap()
+            .parse()
+            .unwrap();
             let name = name_el.text().trim().to_owned();
-            user = User::Known{id, name};
+            user = User::Known { id, name };
         } else {
             user = User::Anonymous;
         }
 
-        #[derive(Debug,Deserialize)]
-        struct QuoteData{
-            pub timestamp:i64,
+        #[derive(Debug, Deserialize)]
+        struct QuoteData {
+            pub timestamp: i64,
         }
 
-        let comment_wrap_el = n.find(Attr("data-quotedata",())).next().unwrap();
-        let qd:QuoteData = serde_json::from_str(comment_wrap_el.attr("data-quotedata").unwrap()).unwrap();
-        let posted_at = Utc.timestamp_opt(qd.timestamp,0).single().unwrap();
+        let comment_wrap_el = n.find(Attr("data-quotedata", ())).next().unwrap();
+        let qd: QuoteData =
+            serde_json::from_str(comment_wrap_el.attr("data-quotedata").unwrap()).unwrap();
+        let posted_at = Utc.timestamp_opt(qd.timestamp, 0).single().unwrap();
 
-        Post{
+        Post {
             id,
             num,
             user,
