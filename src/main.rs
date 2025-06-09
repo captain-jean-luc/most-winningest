@@ -95,6 +95,16 @@ const KNOWN_SYSTEMS: &[(&str, &[&str])] = &[
     ]),
     ("Ranger", &[
         "GrayTheCat",
+        "Evergreen Shadow",
+        "Jared The Fabulous",
+        "Jerry The Fabulous",
+        "Chrome Shadow",
+        "Adriel Shadow",
+        "Fhern Shadow",
+        "Ian Shadow",
+        "Moltosha Shadow",
+        "Exabier Shadow",
+        "System Corporation",
     ]),
     ("TurboSimmie", &[
         "Chloe - September13",
@@ -116,18 +126,6 @@ const KNOWN_SYSTEMS: &[(&str, &[&str])] = &[
     ]),
     ("Seagull", &[
         "Reina Akabane",
-    ]),
-    ("System Corporation", &[
-        "Ranger",
-        "Evergreen Shadow",
-        "Jared The Fabulous",
-        "Jerry The Fabulous",
-        "Chrome Shadow",
-        "Adriel Shadow",
-        "Fhern Shadow",
-        "Ian Shadow",
-        "Moltosha Shadow",
-        "Exabier Shadow",
     ]),
 ];
 
