@@ -286,14 +286,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             master = master_ref.as_ref().map(|s| s.to_owned()).or(user_to_system.get(sub_standing_ref.name.as_str()).map(|s| (*s).to_string()));
             sub_standing = sub_standing_ref.clone();
         }
-        if let Some(name) = master {
-            if let Some(otherid) = name_to_id.get(&name) {
-                let &mut (ref mut master_standing, _) = standings.get_mut(otherid).unwrap();
-                master_standing.accrued_time += sub_standing.accrued_time;
-                master_standing.post_count += sub_standing.post_count;
-                standings.remove(&id);
-            }
-        }
+        let Some(name) = master else { continue; };
+        let Some(otherid) = name_to_id.get(&name) else { continue; };
+        let &mut (ref mut master_standing, _) = standings.get_mut(otherid).unwrap();
+        master_standing.accrued_time += sub_standing.accrued_time;
+        master_standing.post_count += sub_standing.post_count;
+        standings.remove(&id);
     }
     let x:Vec<_> = standings.values().map(|a| &a.0).collect();
     diesel::insert_into(standings::table).values(x).execute(&mut conn).unwrap();
