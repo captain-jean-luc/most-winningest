@@ -1,0 +1,48 @@
+pub const KNOWN_SYSTEMS: &[(&str, &[&str])] = &[
+    ("jean-luc", &["Snow", "HenHenry"]),
+    ("Luminesce", &["Reisen", "Tewi", "Flandre", "Lucilyn"]),
+    ("Breloomancer", &["Thelmign"]),
+    ("TB", &["Byakko", "Rena Bonnie"]),
+    (
+        "BearBaeBeau",
+        &["Autumn Ren", "Ashley", "Joy", "Misha", "Gweneth"],
+    ),
+    (
+        "Felight",
+        &[
+            "Indigo Blue",
+            "Apollo Fire",
+            "Dynamo Lux",
+            "Gelato Sweet",
+            "Piano Soul",
+            "Radio Hiss",
+        ],
+    ),
+    (
+        "Ranger",
+        &[
+            "GrayTheCat",
+            "Evergreen Shadow",
+            "Jared The Fabulous",
+            "Jerry The Fabulous",
+            "Chrome Shadow",
+            "Adriel Shadow",
+            "Fhern Shadow",
+            "Ian Shadow",
+            "Moltosha Shadow",
+            "Exabier Shadow",
+            "System Corporation",
+        ],
+    ),
+    (
+        "TurboSimmie",
+        &["Chloe - September13", "September13", "September 13"],
+    ),
+    ("Yakumo", &["Ido"]),
+    ("Linkzelda", &["| Eva |", "| Ada |"]),
+    ("Ice909", &["Janey_is_Better_Than_Pleeb"]),
+    ("Shaula", &["Nightfall"]),
+    ("Seagull", &["Reina Akabane"]),
+    ("Lilith_", &["Gloomynoon", "Myo"]),
+    ("Seraphina_", &["Rhea", "SillyPhoenix"]),
+];
