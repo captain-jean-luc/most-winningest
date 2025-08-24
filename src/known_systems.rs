@@ -41,7 +41,7 @@ pub const KNOWN_SYSTEMS: &[(&str, &[&str])] = &[
     ("Yakumo", &["Ido"]),
     ("Linkzelda", &["| Eva |", "| Ada |"]),
     ("Ice909", &["Janey_is_Better_Than_Pleeb"]),
-    ("Shaula", &["Nightfall"]),
+    ("Shaula", &["Nightfall", "Linda Supernova"]),
     ("Seagull", &["Reina Akabane"]),
     ("Lilith_", &["Gloomynoon", "Myo"]),
     ("Seraphina_", &["Rhea", "SillyPhoenix"]),
