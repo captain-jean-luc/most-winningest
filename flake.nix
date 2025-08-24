@@ -6,7 +6,7 @@
     inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, flake-utils, fenix }: 
+  outputs = { nixpkgs, flake-utils, fenix, ... }: 
     flake-utils.lib.eachDefaultSystem (system: let
       pkgs = import nixpkgs { inherit system; };
       toolchain = fenix.packages.${system}.stable.completeToolchain;
@@ -15,11 +15,11 @@
         rustc = toolchain;
       };
       diesel-cli = pkgs.diesel-cli.override { inherit rustPlatform; };
-    in {
+    in rec {
       packages.default = pkgs.callPackage ./package.nix { inherit rustPlatform; };
       devShells.default = pkgs.mkShell { 
         packages = [ diesel-cli toolchain ];
-        inputsFrom = [ self.packages."x86_64-linux".default ];
+        inputsFrom = [ packages.default ];
       };
     });
 }

@@ -10,8 +10,8 @@ reqwest = { version = "0.12", features = ["gzip", "cookies"] }
 tokio = { version = "1.39.2", features = ["full"] }
 chrono = "0.4.19"
 dotenvy = "0.15.0"
-phf = { version = "0.7.24", features = ["macros"] }
+phf = { version = "0.13.0", features = ["macros"] }
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-maud = "0.22.3"
+maud = "0.27.0"
 diesel = { version = "2.2.7", features = ["postgres","chrono","r2d2"] }
