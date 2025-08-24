@@ -17,7 +17,6 @@
 
   src = ./.;
 
-  useFetchCargoVendor = true;
   cargoLock.lockFile = ./Cargo.lock;
 }
 
