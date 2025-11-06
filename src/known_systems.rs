@@ -2,7 +2,7 @@ pub const KNOWN_SYSTEMS: &[(&str, &[&str])] = &[
     ("jean-luc", &["Snow", "HenHenry"]),
     ("Luminesce", &["Reisen", "Tewi", "Flandre", "Lucilyn"]),
     ("Breloomancer", &["Thelmign"]),
-    ("TB", &["Byakko", "Rena Bonnie"]),
+    ("TB", &["Byakko", "Rena Bonnie", "LB", "Mitski"]),
     (
         "BearBaeBeau",
         &["Autumn Ren", "Ashley", "Joy", "Misha", "Gweneth"],
