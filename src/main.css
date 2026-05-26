@@ -1,0 +1,40 @@
+.name { display: inline-block; }
+#select-leaderboard-group {
+    margin-bottom: 1rem;
+}
+#select-leaderboard-group label {
+    display: block;
+    padding: 4px 8px;
+    border: 1px solid grey;
+    border-radius: 3px;
+    margin: 4px 0;
+    width: fit-content;
+}
+#select-leaderboard-group input {
+    margin-right: 5px;
+}
+
+
+#individual-standings {
+    display: none;
+}
+#select-leaderboard-group:has(#ty-individual:checked) ~ #individual-standings {
+    display: table;
+}
+#select-leaderboard-group:has(#ty-individual:checked) ~ #system-standings {
+    display: none;
+}
+
+.exact-username {
+    white-space: pre-wrap;
+    padding: 0.5px 3px;
+    border-radius: 4px;
+    margin: 2px 0;
+    display: inline-block;
+    background-color: #eee;
+    font-family: monospace;
+}
+
+#gartic-container {
+    display: none; /* will be made visible by js if relevant */
+}

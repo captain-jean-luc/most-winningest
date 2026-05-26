@@ -131,50 +131,15 @@ pub fn generate() {
         (DOCTYPE)
         html {
             head {
-                (PreEscaped(r#"<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">"#))
-                style { r#"
-                    .name { display: inline-block; }
-                    #select-leaderboard-group {
-                        margin-bottom: 1rem;
-                    }
-                    #select-leaderboard-group label {
-                        display: block;
-                        padding: 4px 8px;
-                        border: 1px solid grey;
-                        border-radius: 3px;
-                        margin: 4px 0;
-                        width: fit-content;
-                    }
-                    #select-leaderboard-group input {
-                        margin-right: 5px;
-                    }
-                    
-
-                    #individual-standings {
-                        display: none;
-                    }
-                    #select-leaderboard-group:has(#ty-individual:checked) ~ #individual-standings {
-                        display: table;
-                    }
-                    #select-leaderboard-group:has(#ty-individual:checked) ~ #system-standings {
-                        display: none;
-                    }
-
-                    .exact-username {
-                        white-space: pre-wrap;
-                        padding: 0.5px 3px;
-                        border-radius: 4px;
-                        margin: 2px 0;
-                        display: inline-block;
-                        background-color: #eee;
-                        font-family: monospace;
-                    }
-                "#}
+                meta charset="utf-8";
+                meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no";
+                link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous";
+                style { (include_str!("main.css")) }
                 title { "LOTPW Stats" }
             }
             body {
                 .container {
-                    div {
+                    #gartic-container {
                         "Gartic phone shall happen"
                         #time-until {}
                     }
@@ -246,38 +211,7 @@ pub fn generate() {
                         a href="https://github.com/captain-jean-luc/most-winningest" { "Source" }
                     }
                     script {
-                        (PreEscaped(r#"
-                            const time_until = document.getElementById("time-until");
-                            const gartic_phoning_at = new Date("2026-05-26T22:02:53Z");
-                            function plural(count) {
-                                if (count == 1) return "";
-                                return "s";
-                            }
-                            function time_diff_text() {
-                                const now = Date.now();
-                                const diff = gartic_phoning_at - now;
-                                const diff_s = diff / 1000.0;
-                              
-                                if (diff < -3600) return 'in the past RIP';
-                                if (-3600 <= diff && diff < -300) return 'nowish';
-                                if (-300 <= diff && diff <= 0) return 'now!';
-                              
-                                const seconds = Math.floor((diff / 1000) % 60);
-                                const minutes = Math.floor((diff / (1000 * 60)) % 60);
-                                const hours = Math.floor(diff / (1000 * 60 * 60));
-                              
-                                let res = "in ";
-                                if (diff_s >= 3600) res += `${hours} hour${plural(hours)} `;
-                                if (diff_s >= 60) res += `${minutes} minute${plural(hours)} and `;
-                                res += `${seconds} second${plural(seconds)}`;
-                              
-                                return res;
-                            }
-                            function do_update() {
-                                time_until.innerText = time_diff_text();
-                            }
-                            setInterval(do_update, 100);
-                        "#))
+                        (PreEscaped(include_str!("./main.js")))
                     }
                 }
             }
