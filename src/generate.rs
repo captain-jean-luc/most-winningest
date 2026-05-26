@@ -174,6 +174,10 @@ pub fn generate() {
             }
             body {
                 .container {
+                    div {
+                        "Gartic phone shall happen"
+                        #time-until {}
+                    }
                     h1 { "LOTPW Stats" }
                     p {
                         r#"Any time that Anonymous/Guest posters have accrued is at the bottom. Updated every hour. Last updated "#
@@ -240,6 +244,40 @@ pub fn generate() {
                         "Made by Jean-luc"
                         " | "
                         a href="https://github.com/captain-jean-luc/most-winningest" { "Source" }
+                    }
+                    script {
+                        (PreEscaped(r#"
+                            const time_until = document.getElementById("time-until");
+                            const gartic_phoning_at = new Date("2026-05-26T22:02:53Z");
+                            function plural(count) {
+                                if (count == 1) return "";
+                                return "s";
+                            }
+                            function time_diff_text() {
+                                const now = Date.now();
+                                const diff = gartic_phoning_at - now;
+                                const diff_s = diff / 1000.0;
+                              
+                                if (diff < -3600) return 'in the past RIP';
+                                if (-3600 <= diff && diff < -300) return 'nowish';
+                                if (-300 <= diff && diff <= 0) return 'now!';
+                              
+                                const seconds = Math.floor((diff / 1000) % 60);
+                                const minutes = Math.floor((diff / (1000 * 60)) % 60);
+                                const hours = Math.floor(diff / (1000 * 60 * 60));
+                              
+                                let res = "in ";
+                                if (diff_s >= 3600) res += `${hours} hour${plural(hours)} `;
+                                if (diff_s >= 60) res += `${minutes} minute${plural(hours)} and `;
+                                res += `${seconds} second${plural(seconds)}`;
+                              
+                                return res;
+                            }
+                            function do_update() {
+                                time_until.innerText = time_diff_text();
+                            }
+                            setInterval(do_update, 100);
+                        "#))
                     }
                 }
             }
