@@ -45,4 +45,5 @@ pub const KNOWN_SYSTEMS: &[(&str, &[&str])] = &[
     ("Seagull", &["Reina Akabane"]),
     ("Lilith_", &["Gloomynoon", "Myo"]),
     ("Seraphina_", &["Rhea", "SillyPhoenix"]),
+    ("fennecfoxx", &["KayKay"]),
 ];
